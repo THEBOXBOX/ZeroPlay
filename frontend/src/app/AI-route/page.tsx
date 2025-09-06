@@ -13,14 +13,6 @@ export interface FilterState {
   region: string;
 }
 
-export interface ChatMessage {
-  id: string;
-  type: 'user' | 'bot';
-  content: string;
-  timestamp: Date;
-  routes?: RouteRecommendation[];
-}
-
 export interface RouteRecommendation {
   id: string;
   title: string;
@@ -47,134 +39,32 @@ export default function AIRoutePage() {
     region: ''
   });
 
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: '1',
-      type: 'bot',
-      content: '안녕하세요! 🎒 AI 여행 코스 추천 서비스입니다. 어떤 여행을 계획하고 계신가요?',
-      timestamp: new Date()
-    }
-  ]);
-
   const [currentRoutes, setCurrentRoutes] = useState<RouteRecommendation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
-    // 필터 변경 시 AI에게 알림 메시지 추가
-    const filterMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: `필터 설정: ${Object.entries(newFilters)
-        .filter(([_, value]) => value && (Array.isArray(value) ? value.length > 0 : true))
-        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
-        .join(', ')}`,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, filterMessage]);
-    
-    // AI 응답 시뮬레이션
-    setTimeout(() => {
-      const botResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: '설정해주신 조건에 맞는 여행 코스를 찾아보겠습니다! 더 구체적인 요청사항이 있으시면 말씀해 주세요.',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, botResponse]);
-    }, 1000);
   };
 
-  const handleSendMessage = async (message: string) => {
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: message,
-      timestamp: new Date()
+  const handleRouteGenerated = (routeData: any) => {
+    // ChatBot에서 생성된 루트 데이터를 처리
+    const newRoute: RouteRecommendation = {
+      id: routeData.id.toString(),
+      title: routeData.title,
+      duration: routeData.duration,
+      totalBudget: routeData.totalBudget || 100000,
+      places: routeData.places.map((place: any, index: number) => ({
+        id: (index + 1).toString(),
+        name: place.name,
+        type: place.type,
+        duration: place.duration,
+        cost: place.cost || 20000,
+        description: place.description || `${place.name}에서 즐기는 특별한 시간`
+      })),
+      highlights: routeData.highlights || ['힐링', '맛집', '관광'],
+      difficulty: routeData.difficulty || 'easy'
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setIsLoading(true);
-
-    // AI 응답 시뮬레이션 (실제로는 API 호출)
-    setTimeout(() => {
-      // 샘플 루트 데이터
-      const sampleRoutes: RouteRecommendation[] = [
-        {
-          id: '1',
-          title: '강릉 바다 힐링 코스',
-          duration: '1박 2일',
-          totalBudget: 85000,
-          places: [
-            {
-              id: '1',
-              name: '강릉 안목해변',
-              type: 'ATTRACTION',
-              duration: '2시간',
-              cost: 0,
-              description: '커피거리와 함께 즐기는 해변'
-            },
-            {
-              id: '2',
-              name: '테라로사 커피공장',
-              type: 'CAFE',
-              duration: '1시간',
-              cost: 15000,
-              description: '유명 로스터리 카페'
-            },
-            {
-              id: '3',
-              name: '강릉중앙시장',
-              type: 'RESTAURANT',
-              duration: '1.5시간',
-              cost: 25000,
-              description: '현지 맛집 투어'
-            }
-          ],
-          highlights: ['바다뷰', '커피투어', '로컬맛집'],
-          difficulty: 'easy'
-        },
-        {
-          id: '2',
-          title: '속초 자연 탐방 코스',
-          duration: '당일',
-          totalBudget: 65000,
-          places: [
-            {
-              id: '4',
-              name: '설악산 국립공원',
-              type: 'PARK',
-              duration: '4시간',
-              cost: 3000,
-              description: '자연 트레킹 코스'
-            },
-            {
-              id: '5',
-              name: '속초해수욕장',
-              type: 'ATTRACTION',
-              duration: '2시간',
-              cost: 0,
-              description: '해변 산책과 휴식'
-            }
-          ],
-          highlights: ['자연탐방', '트레킹', '힐링'],
-          difficulty: 'moderate'
-        }
-      ];
-
-      const botResponse: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        type: 'bot',
-        content: '조건에 맞는 여행 코스를 찾았습니다! 아래 추천 코스들을 확인해보세요.',
-        timestamp: new Date(),
-        routes: sampleRoutes
-      };
-
-      setMessages(prev => [...prev, botResponse]);
-      setCurrentRoutes(sampleRoutes);
-      setIsLoading(false);
-    }, 2000);
+    setCurrentRoutes(prev => [...prev, newRoute]);
   };
 
   return (
@@ -243,11 +133,7 @@ export default function AIRoutePage() {
                 </h2>
               </div>
               
-              <ChatBot
-                messages={messages}
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
-              />
+              <ChatBot onRouteGenerated={handleRouteGenerated} />
             </div>
           </div>
         </div>
