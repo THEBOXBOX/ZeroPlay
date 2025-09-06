@@ -1,118 +1,257 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import FilterButtons from './components/FilterButtons';
+import ChatBot from './components/ChatBot';
+import RouteResults from './components/RouteResults';
 
-interface TravelRecommendation {
-  id: number;
-  title: string;
-  budget: number;
+export interface FilterState {
+  budget: string;
   duration: string;
-  highlights: string[];
+  companions: string;
+  interests: string[];
+  region: string;
 }
 
-export default function Home() {
-  const [recommendations, setRecommendations] = useState<TravelRecommendation[]>([]);
-  const [loading, setLoading] = useState(false);
+export interface ChatMessage {
+  id: string;
+  type: 'user' | 'bot';
+  content: string;
+  timestamp: Date;
+  routes?: RouteRecommendation[];
+}
 
-  const fetchRecommendations = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:3001/api/travel/recommend', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          budget: 100000,
-          interests: ['카페', '바다'],
-          duration: '1박 2일',
-          companions: '연인'
-        }),
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        setRecommendations(data.data);
-      }
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-    } finally {
-      setLoading(false);
+export interface RouteRecommendation {
+  id: string;
+  title: string;
+  duration: string;
+  totalBudget: number;
+  places: Array<{
+    id: string;
+    name: string;
+    type: string;
+    duration: string;
+    cost: number;
+    description: string;
+  }>;
+  highlights: string[];
+  difficulty: 'easy' | 'moderate' | 'hard';
+}
+
+export default function AIRoutePage() {
+  const [filters, setFilters] = useState<FilterState>({
+    budget: '',
+    duration: '',
+    companions: '',
+    interests: [],
+    region: ''
+  });
+
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: '1',
+      type: 'bot',
+      content: '안녕하세요! 🎒 AI 여행 코스 추천 서비스입니다. 어떤 여행을 계획하고 계신가요?',
+      timestamp: new Date()
     }
+  ]);
+
+  const [currentRoutes, setCurrentRoutes] = useState<RouteRecommendation[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    // 필터 변경 시 AI에게 알림 메시지 추가
+    const filterMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: `필터 설정: ${Object.entries(newFilters)
+        .filter(([_, value]) => value && (Array.isArray(value) ? value.length > 0 : true))
+        .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
+        .join(', ')}`,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, filterMessage]);
+    
+    // AI 응답 시뮬레이션
+    setTimeout(() => {
+      const botResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: '설정해주신 조건에 맞는 여행 코스를 찾아보겠습니다! 더 구체적인 요청사항이 있으시면 말씀해 주세요.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botResponse]);
+    }, 1000);
   };
 
-  useEffect(() => {
-    fetchRecommendations();
-  }, []);
+  const handleSendMessage = async (message: string) => {
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: message,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsLoading(true);
+
+    // AI 응답 시뮬레이션 (실제로는 API 호출)
+    setTimeout(() => {
+      // 샘플 루트 데이터
+      const sampleRoutes: RouteRecommendation[] = [
+        {
+          id: '1',
+          title: '강릉 바다 힐링 코스',
+          duration: '1박 2일',
+          totalBudget: 85000,
+          places: [
+            {
+              id: '1',
+              name: '강릉 안목해변',
+              type: 'ATTRACTION',
+              duration: '2시간',
+              cost: 0,
+              description: '커피거리와 함께 즐기는 해변'
+            },
+            {
+              id: '2',
+              name: '테라로사 커피공장',
+              type: 'CAFE',
+              duration: '1시간',
+              cost: 15000,
+              description: '유명 로스터리 카페'
+            },
+            {
+              id: '3',
+              name: '강릉중앙시장',
+              type: 'RESTAURANT',
+              duration: '1.5시간',
+              cost: 25000,
+              description: '현지 맛집 투어'
+            }
+          ],
+          highlights: ['바다뷰', '커피투어', '로컬맛집'],
+          difficulty: 'easy'
+        },
+        {
+          id: '2',
+          title: '속초 자연 탐방 코스',
+          duration: '당일',
+          totalBudget: 65000,
+          places: [
+            {
+              id: '4',
+              name: '설악산 국립공원',
+              type: 'PARK',
+              duration: '4시간',
+              cost: 3000,
+              description: '자연 트레킹 코스'
+            },
+            {
+              id: '5',
+              name: '속초해수욕장',
+              type: 'ATTRACTION',
+              duration: '2시간',
+              cost: 0,
+              description: '해변 산책과 휴식'
+            }
+          ],
+          highlights: ['자연탐방', '트레킹', '힐링'],
+          difficulty: 'moderate'
+        }
+      ];
+
+      const botResponse: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: '조건에 맞는 여행 코스를 찾았습니다! 아래 추천 코스들을 확인해보세요.',
+        timestamp: new Date(),
+        routes: sampleRoutes
+      };
+
+      setMessages(prev => [...prev, botResponse]);
+      setCurrentRoutes(sampleRoutes);
+      setIsLoading(false);
+    }, 2000);
+  };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            🎒 청년을 위한 국내여행 추천 서비스
-          </h1>
-          <p className="text-lg text-gray-600">
-            합리적인 예산으로 특별한 경험을, 숨겨진 로컬 명소를 발견하세요
-          </p>
-        </header>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div className="col-span-full text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-              <p className="mt-4 text-gray-600">맞춤 여행 코스를 찾고 있어요...</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">🤖 AI 여행 코스 추천</h1>
+              <p className="text-sm text-gray-600 mt-1">
+                AI가 당신만을 위한 맞춤 여행 코스를 제안해드립니다
+              </p>
             </div>
-          ) : (
-            recommendations.map((rec) => (
-              <div key={rec.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                  {rec.title}
-                </h3>
-                <div className="space-y-2 text-sm text-gray-600 mb-4">
-                  <p>💰 예산: {rec.budget.toLocaleString()}원</p>
-                  <p>⏰ 기간: {rec.duration}</p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-700 mb-2">하이라이트:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {rec.highlights.map((highlight, index) => (
-                      <span key={index} className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full text-xs">
-                        {highlight}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <button className="w-full bg-indigo-500 text-white py-2 px-4 rounded-lg hover:bg-indigo-600 transition-colors">
-                  상세보기
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        <section className="mt-16 bg-white rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            🎁 청년 전용 혜택 정보
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg mb-2">청년 문화패스</h3>
-              <p className="text-gray-600 text-sm mb-2">월 5만원 문화활동 지원</p>
-              <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
-                만 18~34세
-              </span>
-            </div>
-            <div className="border rounded-lg p-4">
-              <h3 className="font-semibold text-lg mb-2">KTX 청년 할인</h3>
-              <p className="text-gray-600 text-sm mb-2">최대 30% 할인</p>
-              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">
-                만 13~28세
-              </span>
+            <div className="flex items-center space-x-2 text-sm text-gray-500">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              <span>AI 연결됨</span>
             </div>
           </div>
-        </section>
+        </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-140px)]">
+          
+          {/* Left Panel - Filters */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg p-6 h-full">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <span className="w-5 h-5 bg-indigo-100 rounded-full flex items-center justify-center mr-2">
+                  ⚙️
+                </span>
+                여행 조건 설정
+              </h2>
+              <FilterButtons 
+                filters={filters} 
+                onFilterChange={handleFilterChange}
+              />
+            </div>
+          </div>
+
+          {/* Right Panel - Chat & Results */}
+          <div className="lg:col-span-2 flex flex-col space-y-4">
+            
+            {/* Results Section */}
+            {currentRoutes.length > 0 && (
+              <div className="bg-white rounded-xl shadow-lg p-6 flex-1 overflow-auto">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mr-2">
+                    🗺️
+                  </span>
+                  추천 코스
+                </h2>
+                <RouteResults routes={currentRoutes} />
+              </div>
+            )}
+
+            {/* Chat Section */}
+            <div className="bg-white rounded-xl shadow-lg flex flex-col h-96">
+              <div className="p-4 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+                  <span className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center mr-2">
+                    💬
+                  </span>
+                  AI 여행 어시스턴트
+                </h2>
+              </div>
+              
+              <ChatBot
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
