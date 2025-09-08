@@ -1,4 +1,4 @@
-import { MapScriptLoader, KakaoMap } from './components';
+import { MapScriptLoader, UnifiedMap } from './components';
 import Link from 'next/link';
 
 export default function MapMainPage() {
@@ -17,48 +17,36 @@ export default function MapMainPage() {
               🗺️ Epic 2: 지도 기반 로컬 체험 서비스
             </h1>
             <p className="text-gray-600">
-              MAP-001: 카카오맵 기본 컴포넌트 ✅ 완료!
+              MAP-001 ✅ + MAP-002 ✅ 하나의 지도에 통합!
             </p>
           </div>
           <Link 
             href="/Map/location" 
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
-            다음: MAP-002 현재 위치 →
+            개발 버전 보기
           </Link>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      {/* 통합 지도 */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="mb-4">
           <h2 className="text-xl font-semibold text-gray-800">
-            📍 서울 시청 중심 지도
+            🎯 MAP-001 + MAP-002 통합 지도
           </h2>
           <p className="text-gray-600 text-sm">
-            기본 마커와 정보창이 표시됩니다.
+            서울시청 기본 마커 + 현재 위치 기능이 하나의 지도에 통합되었습니다.
           </p>
         </div>
         
         <MapScriptLoader>
-          <KakaoMap 
+          <UnifiedMap 
             width="100%" 
-            height="500px" 
+            height="600px" 
             level={3}
-            lat={37.566826}  // 서울 시청
-            lng={126.9786567}
           />
         </MapScriptLoader>
-
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-semibold text-gray-800 mb-2">✅ MAP-001 완료!</h3>
-          <ul className="text-sm text-gray-600 space-y-1">
-            <li>✅ 지도가 정상적으로 로드됨</li>
-            <li>✅ 서울 시청 위치가 중앙에 표시됨</li>
-            <li>✅ 마커와 정보창이 표시됨</li>
-            <li>✅ 지도 줌인/줌아웃 작동</li>
-            <li>✅ 지도 드래그 작동</li>
-          </ul>
-        </div>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -69,39 +57,69 @@ export default function MapMainPage() {
             <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">완료</span>
           </div>
           <h4 className="font-semibold text-gray-900 mb-2">기본 지도 컴포넌트</h4>
-          <p className="text-gray-600 text-sm">카카오맵 API 기본 설정 및 지도 렌더링</p>
+          <p className="text-gray-600 text-sm mb-3">카카오맵 API 기본 설정 및 지도 렌더링</p>
+          <ul className="text-xs text-gray-500 space-y-1">
+            <li>✅ 지도 렌더링</li>
+            <li>✅ 서울시청 마커</li>
+            <li>✅ 정보창</li>
+            <li>✅ 줌/드래그</li>
+          </ul>
         </div>
 
         {/* MAP-002 */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-800">MAP-002</h3>
-            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">진행중</span>
+            <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">완료</span>
           </div>
           <h4 className="font-semibold text-gray-900 mb-2">현재 위치 기능</h4>
-          <p className="text-gray-600 text-sm mb-4">사용자 위치 권한 요청 및 표시</p>
-          <Link 
-            href="/Map/location" 
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
-          >
-            개발 중
-          </Link>
+          <p className="text-gray-600 text-sm mb-3">사용자 위치 권한 요청 및 표시</p>
+          <ul className="text-xs text-gray-500 space-y-1">
+            <li>✅ 위치 권한 요청</li>
+            <li>✅ 파란색 원형 마커</li>
+            <li>✅ 지도 중심 이동</li>
+            <li>✅ 에러 처리</li>
+          </ul>
         </div>
 
         {/* MAP-003 */}
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-gray-300">
+        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-800">MAP-003</h3>
-            <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">대기</span>
+            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">다음</span>
           </div>
           <h4 className="font-semibold text-gray-900 mb-2">DB 스키마 설계</h4>
-          <p className="text-gray-600 text-sm mb-4">로컬 스팟 데이터 구조 설계</p>
+          <p className="text-gray-600 text-sm mb-3">로컬 스팟 데이터 구조 설계</p>
           <button 
-            disabled
-            className="bg-gray-300 text-gray-500 px-4 py-2 rounded text-sm cursor-not-allowed"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors w-full"
           >
-            대기 중
+            곧 시작!
           </button>
+        </div>
+      </div>
+
+      <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">🎉 통합 지도 완성!</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-semibold text-green-600 mb-2">✅ 하나의 지도에 통합된 기능:</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• 📍 서울시청 고정 마커 (MAP-001)</li>
+              <li>• 🔵 현재 위치 표시 (MAP-002)</li>
+              <li>• 🎯 위치 간 쉬운 이동</li>
+              <li>• 🖱️ 직관적인 컨트롤 패널</li>
+              <li>• ❌ 통합 에러 처리</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-blue-600 mb-2">🔄 다음 작업:</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• MAP-003: 로컬 스팟 DB 스키마 설계</li>
+              <li>• MAP-004: 더미 데이터 생성 (20개)</li>
+              <li>• MAP-005: 스팟 데이터 지도 표시</li>
+              <li>• MAP-006: 카테고리별 핀 구분</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
