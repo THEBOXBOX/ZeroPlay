@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AppContainer from './components/AppContainer';
+import BottomNavigation from './components/BottomNavigation';
 import FilterButtons from './components/FilterButtons';
 import ChatBot from './components/ChatBot';
 import RouteResults from './components/RouteResults';
@@ -85,50 +87,65 @@ export default function AIRoutePage() {
   }, 0);
 
   return (
-    <div className="h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-      
-      {/* 모바일 헤더 */}
-      <header className="bg-white shadow-sm border-b flex-shrink-0">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-gray-800 truncate">🤖 AI 여행 추천</h1>
-              <p className="text-xs text-gray-600 truncate">
-                {activeTab === 'chat' && '맞춤 여행 코스를 상담해보세요'}
-                {activeTab === 'filters' && '여행 조건을 설정해주세요'}
-                {activeTab === 'results' && `${currentRoutes.length}개의 추천 코스`}
-              </p>
+    <AppContainer>
+      {/* 앱 헤더 */}
+      <header className="bg-white border-b border-gray-100 px-4 py-3 flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-white text-lg font-bold">🤖</span>
             </div>
-            <div className="flex items-center space-x-1 text-xs text-gray-500 flex-shrink-0">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              <span>AI 연결됨</span>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">AI 여행 추천</h1>
+              <p className="text-xs text-gray-500">맞춤 여행 코스 생성</p>
             </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-gray-600">🔔</span>
+            </button>
+            <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <span className="text-gray-600">⚙️</span>
+            </button>
           </div>
         </div>
       </header>
 
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden bg-gray-50">
         
         {/* 채팅 탭 */}
         {activeTab === 'chat' && (
           <div className="h-full bg-white">
+            {/* 상단 탭 인디케이터 */}
+            <div className="bg-blue-50 px-4 py-2 border-b">
+              <div className="flex items-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-sm font-medium text-blue-700">AI 여행 추천</span>
+              </div>
+            </div>
             <ChatBot onRouteGenerated={handleRouteGenerated} />
           </div>
         )}
 
         {/* 필터 탭 */}
         {activeTab === 'filters' && (
-          <div className="h-full overflow-auto bg-gray-50">
+          <div className="h-full overflow-auto">
             <div className="p-4 space-y-4">
               
-              {/* 필터 헤더 */}
-              <div className="bg-white rounded-lg shadow-sm p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-semibold text-gray-800">여행 조건 설정</h2>
+              {/* 필터 헤더 카드 */}
+              <div className="bg-white rounded-2xl shadow-sm p-4 border">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                    <span className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 text-sm">
+                      ⚙️
+                    </span>
+                    여행 조건 설정
+                  </h2>
                   {activeFiltersCount > 0 && (
-                    <span className="bg-indigo-100 text-indigo-700 text-sm px-3 py-1 rounded-full font-medium">
-                      {activeFiltersCount}개 선택됨
+                    <span className="bg-indigo-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                      {activeFiltersCount}
                     </span>
                   )}
                 </div>
@@ -138,7 +155,7 @@ export default function AIRoutePage() {
               </div>
 
               {/* 필터 컴포넌트 */}
-              <div className="bg-white rounded-lg shadow-sm p-4">
+              <div className="bg-white rounded-2xl shadow-sm border">
                 <FilterButtons 
                   filters={filters} 
                   onFilterChange={handleFilterChange}
@@ -147,12 +164,12 @@ export default function AIRoutePage() {
 
               {/* 적용 버튼 */}
               {activeFiltersCount > 0 && (
-                <div className="bg-white rounded-lg shadow-sm p-4">
+                <div className="bg-white rounded-2xl shadow-sm p-4 border">
                   <button
                     onClick={() => setActiveTab('chat')}
-                    className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors min-h-[48px]"
+                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-4 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all transform active:scale-95"
                   >
-                    필터 적용하고 채팅 시작하기
+                    조건 적용하고 AI 추천받기 ✨
                   </button>
                 </div>
               )}
@@ -162,30 +179,30 @@ export default function AIRoutePage() {
 
         {/* 결과 탭 */}
         {activeTab === 'results' && (
-          <div className="h-full overflow-auto bg-gray-50">
+          <div className="h-full overflow-auto">
             <div className="p-4">
               {currentRoutes.length > 0 ? (
                 <div className="space-y-4">
                   
-                  {/* 결과 헤더 */}
-                  <div className="bg-white rounded-lg shadow-sm p-4">
+                  {/* 결과 헤더 카드 */}
+                  <div className="bg-white rounded-2xl shadow-sm p-4 border">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-                          <span className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mr-2 text-sm">
-                            🗺️
-                          </span>
-                          추천 코스
-                        </h2>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {currentRoutes.length}개의 맞춤 여행 코스를 찾았어요
-                        </p>
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                          <span className="text-green-600 text-lg">🗺️</span>
+                        </div>
+                        <div>
+                          <h2 className="text-lg font-bold text-gray-900">추천 코스</h2>
+                          <p className="text-sm text-gray-600">
+                            {currentRoutes.length}개의 맞춤 여행 코스
+                          </p>
+                        </div>
                       </div>
                       <button
                         onClick={() => setActiveTab('chat')}
-                        className="text-blue-500 text-sm font-medium px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors"
+                        className="bg-blue-50 text-blue-600 text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors"
                       >
-                        새 코스 요청
+                        + 새 코스
                       </button>
                     </div>
                   </div>
@@ -194,21 +211,19 @@ export default function AIRoutePage() {
                   <RouteResults routes={currentRoutes} />
                 </div>
               ) : (
-                <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-                  <div className="text-gray-400 mb-4">
-                    <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center text-3xl">
-                      🗺️
-                    </div>
+                <div className="bg-white rounded-2xl shadow-sm p-8 text-center border">
+                  <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
+                    <span className="text-3xl text-gray-400">🗺️</span>
                   </div>
-                  <h3 className="text-xl font-medium text-gray-600 mb-2">아직 추천 코스가 없어요</h3>
-                  <p className="text-base text-gray-500 mb-6">
-                    채팅에서 AI와 대화하여 맞춤 여행 코스를 만들어보세요!
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">아직 추천 코스가 없어요</h3>
+                  <p className="text-sm text-gray-600 mb-6 leading-relaxed">
+                    AI와 대화하여<br />맞춤 여행 코스를 만들어보세요!
                   </p>
                   <button
                     onClick={() => setActiveTab('chat')}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium min-h-[48px]"
+                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform active:scale-95"
                   >
-                    채팅 시작하기
+                    AI 추천 시작하기 🚀
                   </button>
                 </div>
               )}
@@ -218,62 +233,12 @@ export default function AIRoutePage() {
       </div>
 
       {/* 하단 네비게이션 */}
-      <div className="bg-white border-t border-gray-200 px-2 py-2 flex-shrink-0">
-        <div className="flex justify-around max-w-sm mx-auto">
-          
-          {/* 채팅 탭 */}
-          <button 
-            onClick={() => setActiveTab('chat')}
-            className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors min-w-0 flex-1 mx-1 ${
-              activeTab === 'chat' 
-                ? 'bg-blue-100 text-blue-600' 
-                : 'text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            <span className="text-xl mb-1">💬</span>
-            <span className="text-xs font-medium">채팅</span>
-          </button>
-          
-          {/* 필터 탭 */}
-          <button 
-            onClick={() => setActiveTab('filters')}
-            className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors min-w-0 flex-1 mx-1 relative ${
-              activeTab === 'filters' 
-                ? 'bg-indigo-100 text-indigo-600' 
-                : 'text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            <span className="text-xl mb-1">⚙️</span>
-            <span className="text-xs font-medium">필터</span>
-            {activeFiltersCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
-                {activeFiltersCount}
-              </span>
-            )}
-          </button>
-          
-          {/* 결과 탭 */}
-          <button 
-            onClick={() => setActiveTab('results')}
-            className={`flex flex-col items-center py-2 px-4 rounded-lg transition-colors min-w-0 flex-1 mx-1 relative ${
-              activeTab === 'results' 
-                ? 'bg-green-100 text-green-600' 
-                : currentRoutes.length === 0 
-                  ? 'text-gray-400' 
-                  : 'text-gray-600 hover:bg-gray-50'
-            }`}
-            disabled={currentRoutes.length === 0}
-          >
-            <span className="text-xl mb-1">🗺️</span>
-            <span className="text-xs font-medium">결과</span>
-            {currentRoutes.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1">
-                {currentRoutes.length}
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
+      <BottomNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        activeFiltersCount={activeFiltersCount}
+        resultsCount={currentRoutes.length}
+      />
+    </AppContainer>
   );
 }

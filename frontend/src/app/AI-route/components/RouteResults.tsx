@@ -108,28 +108,28 @@ export default function RouteResults({ routes, onSaveRoute, onShareRoute }: Rout
         const isSaved = savedRoutes.includes(route.id);
         
         return (
-          <div key={route.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div key={route.id} className="bg-white rounded-2xl shadow-sm border overflow-hidden">
             
-            {/* 루트 헤더 */}
-            <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-5">
+            {/* 루트 헤더 - 더 컴팩트하게 */}
+            <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-medium">
+                    <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">
                       #{routeIndex + 1}
                     </span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(route.difficulty)}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${getDifficultyColor(route.difficulty)}`}>
                       {getDifficultyText(route.difficulty)}
                     </span>
                   </div>
-                  <h2 className="text-xl font-bold mb-2 leading-tight">{route.title}</h2>
+                  <h2 className="text-lg font-bold mb-1 leading-tight">{route.title}</h2>
                 </div>
                 
-                {/* 액션 버튼 */}
-                <div className="flex gap-2 flex-shrink-0">
+                {/* 액션 버튼 - 더 작게 */}
+                <div className="flex gap-1 flex-shrink-0">
                   <button
                     onClick={() => isSaved ? handleUnsave(route) : handleSave(route)}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all text-sm ${
                       isSaved 
                         ? 'bg-red-500 text-white' 
                         : 'bg-white/20 text-white hover:bg-white/30'
@@ -139,37 +139,37 @@ export default function RouteResults({ routes, onSaveRoute, onShareRoute }: Rout
                   </button>
                   <button
                     onClick={() => onShareRoute?.(route)}
-                    className="w-10 h-10 rounded-full bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center"
+                    className="w-8 h-8 rounded-full bg-white/20 text-white hover:bg-white/30 transition-all flex items-center justify-center text-sm"
                   >
                     📤
                   </button>
                 </div>
               </div>
               
-              {/* 여행 정보 */}
-              <div className="grid grid-cols-3 gap-3 text-center">
+              {/* 여행 정보 - 더 컴팩트하게 */}
+              <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="bg-white/10 rounded-lg p-2">
-                  <div className="text-lg">⏱️</div>
-                  <div className="text-xs font-medium">{route.duration}</div>
+                  <div className="text-base">⏱️</div>
+                  <div className="text-xs font-bold">{route.duration}</div>
                 </div>
                 <div className="bg-white/10 rounded-lg p-2">
-                  <div className="text-lg">📍</div>
-                  <div className="text-xs font-medium">{route.places.length}곳</div>
+                  <div className="text-base">📍</div>
+                  <div className="text-xs font-bold">{route.places.length}곳</div>
                 </div>
                 <div className="bg-white/10 rounded-lg p-2">
-                  <div className="text-lg">💰</div>
-                  <div className="text-xs font-medium">{route.totalBudget.toLocaleString()}원</div>
+                  <div className="text-base">💰</div>
+                  <div className="text-xs font-bold">{Math.floor(route.totalBudget/1000)}만원</div>
                 </div>
               </div>
             </div>
 
-            {/* 하이라이트 태그 */}
-            <div className="bg-blue-50 p-4">
-              <div className="flex flex-wrap gap-2">
+            {/* 하이라이트 태그 - 더 컴팩트하게 */}
+            <div className="bg-blue-50 p-3">
+              <div className="flex flex-wrap gap-1">
                 {route.highlights.map((highlight, index) => (
                   <span
                     key={index}
-                    className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-medium"
+                    className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold"
                   >
                     #{highlight}
                   </span>
@@ -181,49 +181,51 @@ export default function RouteResults({ routes, onSaveRoute, onShareRoute }: Rout
             <div className="border-b">
               <button
                 onClick={() => toggleRouteExpansion(route.id)}
-                className="w-full p-4 text-center hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                className="w-full p-3 text-center hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
               >
-                <span className="font-medium text-gray-700">
+                <span className="font-bold text-gray-700 text-sm">
                   {isExpanded ? '간단히 보기' : '자세히 보기'}
                 </span>
-                <span className={`transform transition-transform text-gray-400 ${isExpanded ? 'rotate-180' : ''}`}>
+                <span className={`transform transition-transform text-gray-400 text-sm ${isExpanded ? 'rotate-180' : ''}`}>
                   ▼
                 </span>
               </button>
             </div>
 
             {/* 여행 일정 */}
-            <div className="p-5">
+            <div className="p-4">
               {isExpanded ? (
                 // 상세 보기
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">🗓️ 여행 일정</h3>
+                <div className="space-y-3">
+                  <h3 className="text-base font-bold text-gray-800 mb-3 flex items-center">
+                    🗓️ 여행 일정
+                  </h3>
                   {route.places.map((place, index) => (
-                    <div key={place.id} className="flex gap-4 p-4 bg-gray-50 rounded-xl">
+                    <div key={place.id} className="flex gap-3 p-3 bg-gray-50 rounded-xl">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-lg">
-                          {getPlaceIcon(place.type)}
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="text-base">{getPlaceIcon(place.type)}</span>
                         </div>
                         {index < route.places.length - 1 && (
-                          <div className="w-px h-6 bg-gray-300 mx-auto mt-3"></div>
+                          <div className="w-px h-4 bg-gray-300 mx-auto mt-2"></div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-gray-800">{place.name}</h4>
-                          <span className="text-sm text-gray-500">{place.duration}</span>
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-bold text-gray-800 text-sm">{place.name}</h4>
+                          <span className="text-xs text-gray-500">{place.duration}</span>
                         </div>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="bg-white px-2 py-1 rounded-full text-xs text-gray-600 border">
+                          <span className="bg-white px-2 py-0.5 rounded-full text-xs text-gray-600 border font-medium">
                             {getPlaceTypeText(place.type)}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2 leading-relaxed">{place.description}</p>
+                        <p className="text-xs text-gray-600 mb-2 leading-relaxed">{place.description}</p>
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-blue-600">
+                          <span className="text-sm font-bold text-blue-600">
                             {place.cost === 0 ? '무료' : `${place.cost.toLocaleString()}원`}
                           </span>
-                          <button className="text-blue-500 text-sm font-medium px-3 py-1 rounded-lg hover:bg-blue-50 transition-colors">
+                          <button className="text-blue-500 text-xs font-bold px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors">
                             상세보기
                           </button>
                         </div>
@@ -233,42 +235,44 @@ export default function RouteResults({ routes, onSaveRoute, onShareRoute }: Rout
                 </div>
               ) : (
                 // 간단 보기
-                <div className="space-y-3">
-                  <h3 className="text-base font-semibold text-gray-800 mb-3">🗓️ 주요 일정</h3>
+                <div className="space-y-2">
+                  <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center">
+                    🗓️ 주요 일정
+                  </h3>
                   {route.places.slice(0, 3).map((place, index) => (
-                    <div key={place.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                      <span className="text-xl">{getPlaceIcon(place.type)}</span>
+                    <div key={place.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl">
+                      <span className="text-lg">{getPlaceIcon(place.type)}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <h4 className="font-medium text-gray-800 truncate">{place.name}</h4>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 flex-shrink-0">
+                          <h4 className="font-bold text-gray-800 truncate text-sm">{place.name}</h4>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 flex-shrink-0">
                             <span>{place.duration}</span>
                             <span>•</span>
-                            <span>{place.cost === 0 ? '무료' : `${place.cost.toLocaleString()}원`}</span>
+                            <span>{place.cost === 0 ? '무료' : `${Math.floor(place.cost/1000)}k`}</span>
                           </div>
                         </div>
                       </div>
                     </div>
                   ))}
                   {route.places.length > 3 && (
-                    <div className="text-center py-2">
-                      <span className="text-sm text-gray-500">외 {route.places.length - 3}곳 더</span>
+                    <div className="text-center py-1">
+                      <span className="text-xs text-gray-500">외 {route.places.length - 3}곳 더</span>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* 액션 버튼 영역 */}
-              <div className="mt-6 space-y-3">
-                <button className="w-full bg-blue-500 text-white py-4 px-4 rounded-xl hover:bg-blue-600 transition-colors font-semibold text-lg shadow-lg">
+              {/* 액션 버튼 영역 - 더 컴팩트하게 */}
+              <div className="mt-4 space-y-2">
+                <button className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-xl hover:shadow-lg transition-all font-bold text-sm shadow-md">
                   이 코스로 여행하기 ✈️
                 </button>
-                <div className="grid grid-cols-2 gap-3">
-                  <button className="py-3 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium">
-                    📝 수정하기
+                <div className="grid grid-cols-2 gap-2">
+                  <button className="py-2 px-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-bold text-sm">
+                    📝 수정
                   </button>
-                  <button className="py-3 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium">
-                    📋 일정표 만들기
+                  <button className="py-2 px-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-bold text-sm">
+                    📋 일정표
                   </button>
                 </div>
               </div>
