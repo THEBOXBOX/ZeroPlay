@@ -25,6 +25,7 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -47,6 +48,11 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
+
+    // 키보드 숨기기
+    if (inputRef.current) {
+      inputRef.current.blur();
+    }
 
     // AI 응답 시뮬레이션
     setTimeout(() => {
@@ -84,7 +90,7 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
       '그 지역은 정말 멋진 곳이에요! 어떤 컨셉의 여행을 원하시나요?',
       '예산과 동행인에 대해서도 알려주시면 더 정확한 추천이 가능해요.',
       '잠시만요, 최적의 여행 코스를 찾고 있어요! 🔍',
-      '완벽한 여행 코스를 생성했어요! 아래에서 확인해보세요.'
+      '완벽한 여행 코스를 생성했어요! 결과 탭에서 확인해보세요.'
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   };
@@ -96,6 +102,16 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
     }
   };
 
+  const handleQuickQuestion = (question: string) => {
+    setInputValue(question);
+    // 자동으로 전송
+    setTimeout(() => {
+      if (question === inputValue) { // 값이 정상적으로 설정되었는지 확인
+        handleSendMessage();
+      }
+    }, 100);
+  };
+
   const quickQuestions = [
     '부산 2박 3일 코스 추천해줘',
     '제주도 맛집 여행 코스',
@@ -104,16 +120,8 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-lg h-96 flex flex-col">
-      {/* 채팅 헤더 */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-t-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-          <h3 className="font-semibold">AI 여행 어시스턴트</h3>
-          <span className="text-xs bg-white/20 px-2 py-1 rounded-full">온라인</span>
-        </div>
-      </div>
-
+    <div className="h-full bg-white flex flex-col">
+      
       {/* 메시지 영역 */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
@@ -122,14 +130,18 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
             className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+              className={`max-w-[85%] px-4 py-3 rounded-2xl ${
                 message.type === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-blue-500 text-white rounded-br-md'
+                  : 'bg-gray-100 text-gray-800 rounded-bl-md'
               }`}
             >
-              <p className="text-sm">{message.content}</p>
-              <span className="text-xs opacity-70 mt-1 block">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
+              <span className={`text-xs opacity-70 mt-2 block ${
+                message.type === 'user' ? 'text-right' : 'text-left'
+              }`}>
                 {message.timestamp.toLocaleTimeString([], { 
                   hour: '2-digit', 
                   minute: '2-digit' 
@@ -141,7 +153,7 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 px-4 py-2 rounded-lg">
+            <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -156,16 +168,17 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
 
       {/* 빠른 질문 버튼들 */}
       {messages.length === 1 && (
-        <div className="px-4 pb-2">
-          <p className="text-xs text-gray-500 mb-2">빠른 질문:</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="px-4 pb-3 border-t bg-gray-50">
+          <p className="text-sm font-medium text-gray-700 mb-3 pt-3">💡 빠른 질문을 선택해보세요</p>
+          <div className="space-y-2">
             {quickQuestions.map((question, index) => (
               <button
                 key={index}
-                onClick={() => setInputValue(question)}
-                className="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full transition-colors"
+                onClick={() => handleQuickQuestion(question)}
+                className="w-full text-left bg-white hover:bg-blue-50 px-4 py-3 rounded-xl transition-colors border border-gray-200 shadow-sm min-h-[48px] flex items-center"
               >
-                {question}
+                <span className="mr-3 text-blue-500">💬</span>
+                <span className="text-sm text-gray-700">{question}</span>
               </button>
             ))}
           </div>
@@ -173,25 +186,32 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
       )}
 
       {/* 입력 영역 */}
-      <div className="border-t p-4">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="여행 계획을 알려주세요..."
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isLoading}
-          />
+      <div className="border-t bg-white p-4 pb-6">
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="여행 계획을 알려주세요..."
+              className="w-full border border-gray-300 rounded-full px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[48px] resize-none"
+              disabled={isLoading}
+            />
+          </div>
           <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isLoading}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center min-w-[48px] min-h-[48px] shadow-lg"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
+            {isLoading ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            )}
           </button>
         </div>
       </div>
