@@ -26,8 +26,8 @@ app.use('/api/benefit', benefitRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
+  res.status(200).json({
+    status: 'OK',
     message: 'Travel Recommendation Service Backend is running',
     timestamp: new Date().toISOString()
   });

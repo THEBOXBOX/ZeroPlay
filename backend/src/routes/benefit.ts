@@ -3,10 +3,10 @@ import { BenefitController } from '../controllers/BenefitController';
 
 const router = express.Router();
 
-// 청년 혜택 정보 조회
-router.get('/youth', BenefitController.getYouthBenefits);
+// 혜택 목록 조회 (카테고리 필터링이 핵심)
+router.get('/', BenefitController.getBenefits);
 
-// 지역별 할인 정보
-router.get('/regional/:region', BenefitController.getRegionalDiscounts);
+// 특정 혜택 상세 조회
+router.get('/:id', BenefitController.getBenefitById);
 
-export default router;
+export default router;  // 이 줄이 중요!

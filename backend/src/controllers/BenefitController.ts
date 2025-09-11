@@ -1,64 +1,67 @@
 import { Request, Response } from 'express';
+import { supabase } from '../config/supabase';
 
 export class BenefitController {
-  // 청년 혜택 정보 조회
-  static async getYouthBenefits(req: Request, res: Response) {
+  static async getBenefits(req: Request, res: Response): Promise<void> {
     try {
-      const mockBenefits = [
-        {
-          id: 1,
-          title: "청년 문화패스",
-          category: "문화",
-          discount: "월 5만원 지원",
-          eligibility: "만 18~34세",
-          description: "공연, 전시, 영화 등 문화활동 지원"
-        },
-        {
-          id: 2,
-          title: "KTX 청년 할인",
-          category: "교통",
-          discount: "최대 30% 할인",
-          eligibility: "만 13~28세",
-          description: "KTX 승차권 할인"
-        }
-      ];
+      const { category, region } = req.query;
+      
+      let query = supabase
+        .from('benefits')
+        .select('*')
+        .eq('is_active', true);
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+      
+      if (region) {
+        query = query.eq('region', region);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        res.status(500).json({ error: 'Database error' });
+        return;
+      }
 
       res.json({
         success: true,
-        data: mockBenefits
+        data: data
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get youth benefits'
-      });
+      res.status(500).json({ error: 'Server error' });
     }
   }
 
-  // 지역별 할인 정보
-  static async getRegionalDiscounts(req: Request, res: Response) {
+  static async getBenefitById(req: Request, res: Response): Promise<void> {
     try {
-      const { region } = req.params;
+      const { id } = req.params;
       
-      const mockDiscounts = [
-        {
-          id: 1,
-          businessName: "강릉 로컬 카페",
-          discount: "아메리카노 1+1",
-          region: region,
-          validUntil: "2024-12-31"
-        }
-      ];
+      const { data, error } = await supabase
+        .from('benefits')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-      res.json({
-        success: true,
-        data: mockDiscounts
-      });
+      if (error) {
+        res.status(404).json({ error: 'Benefit not found' });
+        return;
+      }
+
+      res.json({ success: true, data: data });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Failed to get regional discounts'
-      });
+      res.status(500).json({ error: 'Server error' });
     }
+  }
+
+  // 기존 메서드들...
+  static async getYouthBenefits(req: Request, res: Response) {
+    // 기존 코드...
+  }
+
+  static async getRegionalDiscounts(req: Request, res: Response) {
+    // 기존 코드...
   }
 }
