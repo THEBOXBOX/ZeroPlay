@@ -5,9 +5,9 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Places 테이블 활용 API 함수들
+// travel_destinations 테이블 활용 API 함수들
 export const travelApi = {
-  // 여행 추천 가져오기 - places 테이블에서 직접
+  // 여행 추천 가져오기 - travel_destinations 테이블에서 직접
   async getRecommendations(params: {
     budget: number;
     interests: string[];
@@ -15,13 +15,13 @@ export const travelApi = {
     companions: string;
   }) {
     try {
-      console.log('Places 테이블에서 추천 데이터 조회 시작:', params);
+      console.log('travel_destinations 테이블에서 추천 데이터 조회 시작:', params);
 
-      // 단순한 places 테이블 조회부터 시작
-      console.log('기본 places 테이블 조회 시작...');
+      // travel_destinations 테이블 조회
+      console.log('기본 travel_destinations 테이블 조회 시작...');
       
       let query = supabase
-        .from('places')
+        .from('travel_destinations')
         .select('*');
 
       // 점수 높은 순으로 정렬
@@ -33,8 +33,8 @@ export const travelApi = {
         console.error('기본 쿼리도 실패:', error);
         // 더 단순한 쿼리 시도
         const { data: simpleData, error: simpleError } = await supabase
-          .from('places')
-          .select('id, place_name')
+          .from('travel_destinations')
+          .select('id, name')
           .limit(5);
           
         if (simpleError) {
@@ -46,15 +46,38 @@ export const travelApi = {
         throw new Error(`복잡한 쿼리 실패, 단순 쿼리는 성공`);
       }
 
-      if (error) {
-        console.error('Supabase 쿼리 오류:', error);
-        throw new Error(`데이터베이스 오류: ${error?.message || JSON.stringify(error)}`);
-      }
+      console.log('travel_destinations 조회 결과:', data);
 
-      console.log('Places 조회 결과:', data);
+      // 프론트엔드 인터페이스에 맞게 데이터 변환
+      const formattedData = (data || []).map((item: any) => ({
+        id: item.id,
+        title: item.name,
+        budget: this.estimateBudget(item.price_range, params.budget || 50000),
+        duration: `${item.duration_hours || 2}시간`,
+        highlights: this.safeParseArray(item.tags),
+        description: item.description || '멋진 여행지',
+        location: item.address || `${item.region} 지역`,
+        region: item.region,
+        category: item.category,
+        rating: item.rating || 4.0,
+        
+        // 호환성 필드들
+        place_name: item.name,
+        place_type: item.place_type || item.category?.toUpperCase(),
+        avg_stay_minutes: item.avg_stay_minutes || 120,
+        entry_fee: item.entry_fee || 0,
+        score: item.score || item.rating || 4.0,
+
+        estimatedCost: {
+          transportation: Math.floor((params.budget || 50000) * 0.3),
+          accommodation: Math.floor((params.budget || 50000) * 0.4),
+          food: Math.floor((params.budget || 50000) * 0.3)
+        }
+      }));
+
       return {
         success: true,
-        data: data || []
+        data: formattedData
       };
 
     } catch (error) {
@@ -66,23 +89,39 @@ export const travelApi = {
     }
   },
 
+  // 안전한 배열 파싱
+  safeParseArray(value: any): string[] {
+    if (!value) return ['여행', '추천'];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [value];
+      }
+    }
+    return ['여행', '추천'];
+  },
+
+  // 예산 추정
+  estimateBudget(priceRange: string, originalBudget: number): number {
+    const budgetMap: { [key: string]: number } = {
+      'budget_low': Math.min(originalBudget, 30000),
+      'budget_medium': Math.min(originalBudget, 70000),
+      'budget_high': Math.min(originalBudget, 150000)
+    };
+    return budgetMap[priceRange] || originalBudget || 50000;
+  },
+
   // 지역별 장소 가져오기
   async getLocalExperiences(region: string) {
     try {
       console.log('지역별 장소 조회:', region);
 
       const { data, error } = await supabase
-        .from('places')
-        .select(`
-          *,
-          cities (
-            city_name,
-            regions (
-              region_name
-            )
-          )
-        `)
-        .eq('cities.regions.region_name', region)
+        .from('travel_destinations')
+        .select('*')
+        .eq('region', region.toUpperCase())
         .order('score', { ascending: false })
         .limit(20);
 
@@ -111,20 +150,8 @@ export const travelApi = {
       console.log('장소 상세 정보 조회:', id);
 
       const { data, error } = await supabase
-        .from('places')
-        .select(`
-          *,
-          cities (
-            city_name,
-            city_code,
-            latitude,
-            longitude,
-            regions (
-              region_name,
-              region_code
-            )
-          )
-        `)
+        .from('travel_destinations')
+        .select('*')
         .eq('id', parseInt(id))
         .single();
 
@@ -205,9 +232,9 @@ export const travelApi = {
     try {
       console.log('Supabase 연결 테스트 시작');
 
-      // places 테이블로 연결 테스트
+      // travel_destinations 테이블로 연결 테스트
       const { data, error } = await supabase
-        .from('places')
+        .from('travel_destinations')
         .select('count', { count: 'exact' })
         .limit(1);
 
@@ -219,7 +246,7 @@ export const travelApi = {
         };
       }
 
-      console.log('Supabase 연결 성공! Places 테이블 접근 가능');
+      console.log('Supabase 연결 성공! travel_destinations 테이블 접근 가능');
       return {
         success: true,
         data: data
@@ -240,16 +267,8 @@ export const travelApi = {
       console.log('타입별 장소 조회:', placeType);
 
       const { data, error } = await supabase
-        .from('places')
-        .select(`
-          *,
-          cities (
-            city_name,
-            regions (
-              region_name
-            )
-          )
-        `)
+        .from('travel_destinations')
+        .select('*')
         .eq('place_type', placeType.toUpperCase())
         .order('score', { ascending: false })
         .limit(15);
