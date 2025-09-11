@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 // Routes
 import travelRoutes from './routes/travel';
 import benefitRoutes from './routes/benefit';
+import testRoutes from './routes/test'
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/travel', travelRoutes);
 app.use('/api/benefit', benefitRoutes);
+app.use('/api/test', testRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
