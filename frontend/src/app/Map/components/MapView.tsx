@@ -149,7 +149,6 @@ const MapView = () => {
           showLocalDeals={showLocalDeals}
           handleDragStart={handleDragStart}
           isDragging={isDragging}
-          setIsDragging={setIsDragging}
           startY={startY}
           startHeight={startHeight}
           containerRef={containerRef}
