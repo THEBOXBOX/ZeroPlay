@@ -1,29 +1,31 @@
+import React from 'react';
+
 interface CategoryTabsProps {
-  categories: Array<{ name: string; icon: string }>;
-  selectedCategory: string;
-  onCategoryChange: (category: string) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-export default function CategoryTabs({ 
-  categories, 
-  selectedCategory, 
-  onCategoryChange 
-}: CategoryTabsProps) {
+const CategoryTabs: React.FC<CategoryTabsProps> = ({ activeTab, onTabChange }) => {
+  const tabs = ['전체', '혜택', '무료'];
+
   return (
-    <div className="flex space-x-2 overflow-x-auto">
-      {categories.map((category) => (
+    <div className="flex w-full h-full">
+      {tabs.map((tab, index) => (
         <button
-          key={category.name}
-          onClick={() => onCategoryChange(category.name)}
-          className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors ${
-            selectedCategory === category.name
+          key={tab}
+          onClick={() => onTabChange(tab)}
+          className={`flex-1 h-full text-sm font-semibold transition-all duration-200 ${
+            activeTab === tab
               ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-          }`}
+              : 'bg-white text-gray-600 hover:bg-gray-50'
+          } ${index < tabs.length - 1 ? 'border-r border-gray-300' : ''}`}
+          style={{ borderRadius: 0 }}
         >
-          {category.name}
+          {tab}
         </button>
       ))}
     </div>
   );
-}
+};
+
+export default CategoryTabs;

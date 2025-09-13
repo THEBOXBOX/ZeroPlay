@@ -1,64 +1,103 @@
-interface BenefitCardProps {
-  benefit: {
-    id: number;
-    title: string;
-    target_audience: string;
-    category: string;
-    region: string;
-    discount_rate: string;
-    valid_from: string;
-    valid_until: string;
-  };
-  onClick?: () => void;
+import React from 'react';
+import { ExternalLink } from 'lucide-react';
+
+interface BenefitProgram {
+  id: number;
+  title: string;
+  organization: string;
+  amount: string;
+  amountType: string;
+  tags: string[];
+  period: string;
+  age: string;
+  details: string;
+  category: string;
+  region: string;
+  type: string;
 }
 
-export default function BenefitCard({ benefit, onClick }: BenefitCardProps) {
+interface BenefitCardProps {
+  program: BenefitProgram;
+  onClick: (program: BenefitProgram) => void;
+}
+
+const BenefitCard: React.FC<BenefitCardProps> = ({ program, onClick }) => {
+  const getAmountColor = (amountType: string) => {
+    switch(amountType) {
+      case '지원금': return 'text-red-500';
+      case '할인': return 'text-red-500';
+      case '쿠폰': return 'text-red-500';
+      default: return 'text-green-500';
+    }
+  };
+
+  const getTagColor = (tag: string) => {
+    if (tag === '신규') return 'bg-green-100 text-green-700';
+    if (tag === '인기') return 'bg-blue-100 text-blue-700';
+    if (tag === '여행필수') return 'bg-purple-100 text-purple-700';
+    if (tag === '지역') return 'bg-orange-100 text-orange-700';
+    if (tag === '자연') return 'bg-green-100 text-green-700';
+    if (tag === '힐링') return 'bg-blue-100 text-blue-700';
+    if (tag === '교통') return 'bg-indigo-100 text-indigo-700';
+    if (tag === '숙박') return 'bg-pink-100 text-pink-700';
+    if (tag === '지역특화') return 'bg-yellow-100 text-yellow-700';
+    return 'bg-gray-100 text-gray-600';
+  };
+
   return (
     <div 
-      className="bg-white rounded-2xl shadow-md border border-gray-100 p-5 cursor-pointer hover:shadow-lg transition-shadow"
-      onClick={onClick}
+      onClick={() => onClick(program)}
+      className="relative bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
     >
-      {/* 제목과 할인율 */}
-      <div className="flex justify-between items-start mb-3">
-        <div className="flex-1 pr-4">
-          <h3 className="text-xl font-black text-gray-900 mb-1 leading-tight">
-            {benefit.title}
-          </h3>
-          <p className="text-sm text-gray-500 font-medium">{benefit.target_audience}</p>
+      {/* Top white section */}
+      <div className="bg-white p-5 pb-3">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-gray-900 mb-1">{program.title}</h3>
+            <p className="text-sm text-gray-600">{program.organization}</p>
+          </div>
+          <div className="text-right">
+            <div className={`text-xl font-bold ${getAmountColor(program.amountType)}`}>
+              {program.amount}
+            </div>
+            <div className="text-sm text-gray-500">{program.amountType}</div>
+          </div>
         </div>
-        <div className="text-right flex-shrink-0">
-          <div className="text-2xl font-black text-red-600">{benefit.discount_rate}</div>
-          <div className="text-xs text-gray-400 font-medium">지원금</div>
+
+        <div className="flex flex-wrap gap-2">
+          {program.tags.map((tag, tagIndex) => (
+            <span
+              key={tagIndex}
+              className={`px-3 py-1 rounded-full text-xs font-medium ${getTagColor(tag)}`}
+            >
+              {tag}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* 태그들 */}
-      <div className="flex space-x-2 mb-5">
-        <span className="px-3 py-1.5 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-lg">
-          {benefit.category}
-        </span>
-        <span className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-lg">
-          {benefit.region}
-        </span>
-      </div>
-
-      {/* 구분선 */}
-      <div className="border-t border-gray-200 pt-4">
-        <div className="space-y-2.5 text-sm">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500 font-medium">신청기간</span>
-            <span className="text-gray-800 font-semibold">~ 12월 31일</span>
+      {/* Bottom gray section */}
+      <div className="bg-gray-50 px-5 py-3 border-t border-gray-200">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">신청기간</span>
+            <span className="text-gray-700">{program.period}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500 font-medium">대상</span>
-            <span className="text-gray-800 font-semibold">19-24세 청년</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">대상</span>
+            <span className="text-gray-700">{program.age}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-500 font-medium">상태</span>
-            <span className="text-blue-600 font-semibold underline">신청 가능</span>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-500">상세</span>
+            <button className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
+              <span>신청 가능</span>
+              <ExternalLink className="w-3 h-3" />
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default BenefitCard;
