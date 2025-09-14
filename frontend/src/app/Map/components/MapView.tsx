@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Navigation, Tag, MapPin } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 import BottomSheet from './BottomSheet';
+import KakaoMap from './KakaoMap';
 
 const MapView = () => {
   const [activeCategory, setActiveCategory] = useState('전체');
@@ -65,39 +66,30 @@ const MapView = () => {
       />
 
       {/* 지도 영역 */}
-      <div 
-        className="flex-1 relative bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden"
-        onMouseDown={() => setBottomSheetHeight(120)}
-      >
-        {/* 지도 패턴 배경 */}
-        <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23666' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }}
+      <div className="flex-1 relative overflow-hidden">
+        {/* 실제 카카오맵 */}
+        <KakaoMap 
+          width="100%" 
+          height="100%" 
+          level={3}
+          onMapClick={() => setBottomSheetHeight(120)}
+          showCurrentLocation={true}
         />
-        
-        {/* 중앙 지도 핀 */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="bg-green-500 rounded-full p-2 shadow-lg">
-            <MapPin className="w-5 h-5 text-white" />
-          </div>
-        </div>
 
-        {/* 로컬딜 마커들 (로컬딜 모드일 때) */}
+        {/* 로컬딜 마커들 (로컬딜 모드일 때) - 지도 위에 오버레이 */}
         {showLocalDeals && (
           <>
-            <div className="absolute top-1/3 left-1/3 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="absolute top-1/3 left-1/3 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
               <div className="bg-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
                 <Tag className="w-3 h-3 text-white" />
               </div>
             </div>
-            <div className="absolute top-2/3 right-1/3 transform translate-x-1/2 -translate-y-1/2">
+            <div className="absolute top-2/3 right-1/3 transform translate-x-1/2 -translate-y-1/2 pointer-events-none">
               <div className="bg-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
                 <Tag className="w-3 h-3 text-white" />
               </div>
             </div>
-            <div className="absolute bottom-1/3 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+            <div className="absolute bottom-1/3 left-1/2 transform -translate-x-1/2 translate-y-1/2 pointer-events-none">
               <div className="bg-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
                 <Tag className="w-3 h-3 text-white" />
               </div>
@@ -111,7 +103,12 @@ const MapView = () => {
           style={{ bottom: `${floatingButtonBottom}px` }}
           onClick={(e) => {
             e.stopPropagation();
-            alert('현재 위치로 이동합니다');
+            // 실제 현재 위치로 이동 기능
+            if ((window as any).moveToCurrentLocation) {
+              (window as any).moveToCurrentLocation();
+            } else {
+              alert('지도가 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+            }
           }}
         >
           <Navigation className="w-4 h-4 text-gray-600" />

@@ -7,7 +7,8 @@
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "crawl:local": "node --env-file=.env scripts/harvest_kakao.cjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
