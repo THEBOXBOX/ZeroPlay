@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import travelRoutes from './routes/travel';
 import benefitRoutes from './routes/benefit';
 import testRoutes from './routes/test'
+import photoRouter from './routes/photo';
 
 dotenv.config();
 
@@ -24,7 +25,8 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/travel', travelRoutes);
 app.use('/api/benefit', benefitRoutes);
-app.use('/api/test', testRoutes)
+app.use('/api/test', testRoutes);
+app.use('/api', photoRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
