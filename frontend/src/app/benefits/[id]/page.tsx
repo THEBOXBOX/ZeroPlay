@@ -1,4 +1,4 @@
-import BenefitDetailPage from '@/components/BenefitDetailPage';
+import BenefitDetailPage from '@/app/Benefits/components/BenefitDetailPage';
 
 // 청년 문화패스 더미데이터
 const dummyBenefit = {
