@@ -1,6 +1,6 @@
 // backend/src/routes/test.ts (새 파일 생성)
 import { Router } from 'express'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../config/supabase'
 
 const router = Router()
 
