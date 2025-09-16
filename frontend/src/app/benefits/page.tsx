@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import Header from '@/app/Benefits/components/Header';
-import NavBar from '@/app/Benefits/components/NavBar';
-import CategoryTabs from '@/app/Benefits/components/CategoryTabs';
-import BenefitCard from '@/app/Benefits/components/BenefitCard';
+import Header from '@/app/benefits/components/Header';
+import NavBar from '@/app/benefits/components/NavBar';
+import CategoryTabs from '@/app/benefits/components/CategoryTabs';
+import BenefitCard from '@/app/benefits/components/BenefitCard';
 
 interface BenefitProgram {
   id: number;
