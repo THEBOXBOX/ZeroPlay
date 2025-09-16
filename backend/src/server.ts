@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/travel', travelRoutes);
-app.use('/api/benefit', benefitRoutes);
+app.use('/api/benefits', benefitRoutes);  // 수정: benefit → benefits (복수형)
 
 // Health check
 app.get('/api/health', (req, res) => {

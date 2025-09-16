@@ -24,7 +24,7 @@ body {
   height: 852px !important;
   margin: 0 auto;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto; /* hidden에서 auto로 변경 */
   box-shadow: 0 0 20px rgba(0,0,0,0.2);
 }
 

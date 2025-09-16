@@ -1,5 +1,8 @@
+'use client'
+
 import React from 'react';
 import { ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface BenefitProgram {
   id: number;
@@ -18,10 +21,22 @@ interface BenefitProgram {
 
 interface BenefitCardProps {
   program: BenefitProgram;
-  onClick: (program: BenefitProgram) => void;
+  onClick?: (program: BenefitProgram) => void;
 }
 
 const BenefitCard: React.FC<BenefitCardProps> = ({ program, onClick }) => {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    // 세부페이지로 이동
+    router.push(`/benefits/${program.id}`);
+    
+    // 기존 onClick도 호출 (필요한 경우)
+    if (onClick) {
+      onClick(program);
+    }
+  };
+
   const getAmountColor = (amountType: string) => {
     switch(amountType) {
       case '지원금': return 'text-red-500';
@@ -46,7 +61,7 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ program, onClick }) => {
 
   return (
     <div 
-      onClick={() => onClick(program)}
+      onClick={handleCardClick}
       className="relative bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
     >
       {/* Top white section */}
@@ -89,10 +104,10 @@ const BenefitCard: React.FC<BenefitCardProps> = ({ program, onClick }) => {
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">상세</span>
-            <button className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1">
-              <span>신청 가능</span>
+            <div className="text-blue-600 font-medium flex items-center space-x-1">
+              <span>자세히 보기</span>
               <ExternalLink className="w-3 h-3" />
-            </button>
+            </div>
           </div>
         </div>
       </div>
