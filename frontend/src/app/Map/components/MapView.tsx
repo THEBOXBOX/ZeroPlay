@@ -23,7 +23,7 @@ const MapView = () => {
   const floatingButtonBottom = bottomSheetHeight + 15;
 
   // 🔥 훅으로 데이터 가져오기
-  const { spots, loading, error } = useLocalSpots(activeCategory, 50);
+  const { spots, loading, error } = useLocalSpots(activeCategory, 150);
 
   // 드래그 이벤트 처리
   useEffect(() => {
@@ -62,13 +62,20 @@ const MapView = () => {
     setSelectedSpot(null);
   };
 
-  // 🔥 스팟 클릭 핸들러
+  // 🔥 스팟 클릭 핸들러 (상세정보 모드)
   const handleSpotClick = (spot: LocalSpot) => {
     console.log('🏪 [MapView] 스팟 선택:', spot.name);
     setSelectedSpot(spot);
     setShowBottomSheet(true);
-    setBottomSheetHeight(300);
+    setBottomSheetHeight(450); // 🔥 상세정보용으로 높이 증가
     setShowLocalDeals(false);
+  };
+
+  // 🔥 뒤로가기 핸들러 (리스트 모드로 복귀)
+  const handleBackToList = () => {
+    console.log('🔙 [MapView] 리스트 모드로 복귀');
+    setSelectedSpot(null);
+    setBottomSheetHeight(180); // 기본 높이로 복귀
   };
 
   const handleGPSClick = (e: React.MouseEvent) => {
@@ -102,6 +109,14 @@ const MapView = () => {
         setActiveCategory={setActiveCategory}
         setShowBottomSheet={setShowBottomSheet}
         setShowLocalDeals={setShowLocalDeals}
+        onCategoryChange={() => {
+          // 🔥 상세보기 모드에서 리스트 모드로 전환
+          if (selectedSpot) {
+            console.log('📋 상세보기 → 리스트 모드로 전환');
+            setSelectedSpot(null);
+            setBottomSheetHeight(180);
+          }
+        }}
       />
 
       {/* 지도 영역 */}
@@ -186,7 +201,7 @@ const MapView = () => {
           <Tag className={`w-4 h-4 ${showLocalDeals ? 'text-white' : 'text-gray-600'}`} />
         </button>
 
-        {/* 바텀시트 */}
+        {/* 바텀시트 - 🔥 실제 데이터 전달 */}
         <BottomSheet 
           showBottomSheet={showBottomSheet}
           setShowBottomSheet={setShowBottomSheet}
@@ -199,44 +214,14 @@ const MapView = () => {
           startY={startY}
           startHeight={startHeight}
           containerRef={containerRef}
+          spots={spots} // 🔥 실제 스팟 데이터 전달
+          loading={loading} // 🔥 로딩 상태 전달
+          selectedSpot={selectedSpot} // 🔥 선택된 스팟 전달
+          onBackToList={handleBackToList} // 🔥 뒤로가기 핸들러 전달
         />
       </div>
 
-      {/* 🔥 선택된 스팟 정보 표시 */}
-      {selectedSpot && (
-        <div className="absolute bottom-2 left-2 right-2 bg-white rounded-lg shadow-lg p-3 z-40 mx-2">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <h3 className="font-semibold text-gray-900">{selectedSpot.name}</h3>
-                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                  {selectedSpot.category === 'experience' ? '체험' :
-                   selectedSpot.category === 'culture' ? '문화' :
-                   selectedSpot.category === 'restaurant' ? '맛집' : '카페'}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-1">{selectedSpot.address}</p>
-              <div className="flex items-center space-x-3 text-xs">
-                {selectedSpot.price_range && (
-                  <span className="text-blue-600 font-medium">{selectedSpot.price_range}</span>
-                )}
-                {selectedSpot.rating && (
-                  <span className="text-gray-500">⭐ {selectedSpot.rating}</span>
-                )}
-                {selectedSpot.review_count && (
-                  <span className="text-gray-400">({selectedSpot.review_count})</span>
-                )}
-              </div>
-            </div>
-            <button 
-              onClick={() => setSelectedSpot(null)}
-              className="text-gray-400 hover:text-gray-600 ml-2 p-1"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-      )}
+      {/* 🔥 선택된 스팟 오버레이 제거 - 바텀시트에서 처리하므로 불필요 */}
     </div>
   );
 };

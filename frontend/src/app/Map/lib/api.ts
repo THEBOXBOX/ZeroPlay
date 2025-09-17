@@ -114,8 +114,8 @@ export const CATEGORY_NAMES = {
 
 // 🔥 카테고리 색상 매핑 (핀 색상용)
 export const CATEGORY_COLORS = {
-  experience: '#FF6B6B', // 빨간색
-  culture: '#4ECDC4',    // 청록색
-  restaurant: '#45B7D1', // 파란색
-  cafe: '#96CEB4',       // 초록색
+  experience: '#FF195E', // 빨간색
+  culture: '	#FFED4C',    // 노란색
+  restaurant: '#00327F', // 파란색
+  cafe: '	#95E544',       // 초록색
 } as const;
