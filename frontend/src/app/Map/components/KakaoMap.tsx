@@ -1,6 +1,8 @@
+// src/app/Map/components/KakaoMap.tsx - 핀 추가 버전
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { LocalSpot, CATEGORY_COLORS } from '../lib/api';
 
 declare global {
   interface Window {
@@ -17,6 +19,8 @@ interface KakaoMapProps {
   lng?: number;
   onMapClick?: () => void;
   showCurrentLocation?: boolean;
+  spots?: LocalSpot[]; // 🔥 핀 데이터 추가
+  onSpotClick?: (spot: LocalSpot) => void; // 🔥 핀 클릭 핸들러
 }
 
 const KakaoMap = ({
@@ -27,14 +31,17 @@ const KakaoMap = ({
   lng = 126.9786567,
   onMapClick,
   showCurrentLocation = true,
+  spots = [], // 🔥 기본값 빈 배열
+  onSpotClick,
 }: KakaoMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const clickHandlerRef = useRef<((...args: any[]) => void) | null>(null);
-  const currentMarkerRef = useRef<any>(null);      // 현재위치 마커 보관(중복 방지)
-  const currentInfoRef = useRef<any>(null);        // 현재위치 인포윈도우 보관
+  const currentMarkerRef = useRef<any>(null);
+  const currentInfoRef = useRef<any>(null);
+  const spotMarkersRef = useRef<any[]>([]); // 🔥 스팟 마커 보관
 
-  /** 1) 지도 생성: 마운트 시 1번만 */
+  /** 지도 생성: 마운트 시 1번만 */
   useEffect(() => {
     const initializeMap = () => {
       if (!mapContainer.current) return;
@@ -122,7 +129,7 @@ const KakaoMap = ({
     };
   }, []); // ✅ 지도는 한 번만 생성
 
-  /** 2) 좌표/레벨 바뀔 때 지도 상태만 업데이트 (재생성 X) */
+  /** 좌표/레벨 바뀔 때 지도 상태만 업데이트 */
   useEffect(() => {
     if (!mapRef.current) return;
     const nextCenter = new window.kakao.maps.LatLng(lat, lng);
@@ -132,12 +139,11 @@ const KakaoMap = ({
     }
   }, [lat, lng, level]);
 
-  /** 3) 클릭 핸들러는 별도로 부착/해제 */
+  /** 클릭 핸들러 부착/해제 */
   useEffect(() => {
     if (!mapRef.current) return;
 
     if (!onMapClick) {
-      // 기존 핸들러 제거
       if (clickHandlerRef.current) {
         window.kakao.maps.event.removeListener(mapRef.current, 'click', clickHandlerRef.current);
         clickHandlerRef.current = null;
@@ -156,6 +162,74 @@ const KakaoMap = ({
       }
     };
   }, [onMapClick]);
+
+  // 🔥 핀 생성 함수
+  const createSpotMarker = (spot: LocalSpot) => {
+    const color = CATEGORY_COLORS[spot.category];
+    const categoryText = {
+      experience: 'EX',
+      culture: 'CU', 
+      restaurant: 'RE',
+      cafe: 'CA',
+    }[spot.category];
+
+    const svgContent = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="35" viewBox="0 0 28 35">
+        <path d="M14 0C6.268 0 0 6.268 0 14c0 14 14 21 14 21s14-7 14-21C28 6.268 21.732 0 14 0z" fill="${color}"/>
+        <circle cx="14" cy="14" r="7" fill="white"/>
+        <text x="14" y="17" text-anchor="middle" font-size="5" font-weight="bold" fill="${color}">${categoryText}</text>
+      </svg>
+    `;
+
+    // 🔥 안전한 인코딩
+    const imageSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+    const size = new window.kakao.maps.Size(28, 35);
+    const offset = new window.kakao.maps.Point(14, 35);
+    
+    return new window.kakao.maps.MarkerImage(imageSrc, size, { offset });
+  };
+
+  // 🔥 스팟 핀 표시 (spots 배열이 변경될 때마다)
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    console.log('🔄 [KakaoMap] 핀 업데이트 시작:', spots.length, '개');
+
+    // 기존 스팟 마커들 제거
+    spotMarkersRef.current.forEach(marker => marker.setMap(null));
+    spotMarkersRef.current = [];
+
+    // 새로운 스팟 마커들 생성
+    spots.forEach((spot) => {
+      try {
+        const position = new window.kakao.maps.LatLng(spot.latitude, spot.longitude);
+        const markerImage = createSpotMarker(spot);
+        
+        const marker = new window.kakao.maps.Marker({
+          position,
+          image: markerImage,
+          title: spot.name,
+        });
+
+        marker.setMap(mapRef.current);
+        spotMarkersRef.current.push(marker);
+
+        // 마커 클릭 이벤트
+        window.kakao.maps.event.addListener(marker, 'click', () => {
+          console.log('📍 [KakaoMap] 스팟 클릭:', spot.name);
+          if (onSpotClick) {
+            onSpotClick(spot);
+          }
+        });
+
+        console.log('📍 [KakaoMap] 스팟 마커 생성:', spot.name, spot.category);
+      } catch (err) {
+        console.error('❌ [KakaoMap] 스팟 마커 생성 실패:', spot.name, err);
+      }
+    });
+
+    console.log('✅ [KakaoMap] 핀 업데이트 완료:', spotMarkersRef.current.length, '개');
+  }, [spots, onSpotClick]);
 
   return (
     <div ref={mapContainer} style={{ width, height }} className="rounded-lg" />

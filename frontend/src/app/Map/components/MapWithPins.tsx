@@ -1,13 +1,13 @@
-// src/app/Map/components/MapView.tsx - 최종 핀 연동 버전
+// src/app/Map/components/MapView.tsx - 디버깅 버전
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Navigation, Tag } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 import BottomSheet from './BottomSheet';
-import KakaoMap from './KakaoMap'; // 🔥 핀 기능이 추가된 KakaoMap
+import KakaoMap from './KakaoMap'; // 🔥 기존 KakaoMap으로 되돌림
+// import MapWithPins from './MapWithPins'; // 🔥 임시로 주석 처리
 import { LocalSpot } from '../lib/api';
-import { useLocalSpots } from '../hooks/useLocalSpots';
 
 const MapView = () => {
   const [activeCategory, setActiveCategory] = useState('전체');
@@ -22,10 +22,7 @@ const MapView = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const floatingButtonBottom = bottomSheetHeight + 15;
 
-  // 🔥 훅으로 데이터 가져오기
-  const { spots, loading, error } = useLocalSpots(activeCategory, 50);
-
-  // 드래그 이벤트 처리
+  // 🔥 기존 드래그 이벤트 처리
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDragging || !containerRef.current) return;
@@ -60,15 +57,6 @@ const MapView = () => {
   const handleMapClick = () => {
     setBottomSheetHeight(120);
     setSelectedSpot(null);
-  };
-
-  // 🔥 스팟 클릭 핸들러
-  const handleSpotClick = (spot: LocalSpot) => {
-    console.log('🏪 [MapView] 스팟 선택:', spot.name);
-    setSelectedSpot(spot);
-    setShowBottomSheet(true);
-    setBottomSheetHeight(300);
-    setShowLocalDeals(false);
   };
 
   const handleGPSClick = (e: React.MouseEvent) => {
@@ -106,7 +94,7 @@ const MapView = () => {
 
       {/* 지도 영역 */}
       <div className="flex-1 relative overflow-hidden">
-        {/* 🔥 핀이 추가된 KakaoMap */}
+        {/* 🔥 기존 KakaoMap으로 테스트 */}
         <KakaoMap 
           width="100%" 
           height="100%" 
@@ -115,34 +103,17 @@ const MapView = () => {
           lng={126.9780}
           onMapClick={handleMapClick}
           showCurrentLocation={true}
-          spots={spots} // 🔥 핀 데이터 전달
-          onSpotClick={handleSpotClick} // 🔥 핀 클릭 핸들러 전달
         />
 
-        {/* 🔥 로딩/에러 상태 표시 */}
-        {loading && (
-          <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded-full shadow-md z-50">
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-              <span className="text-sm text-gray-600">핀 로딩 중...</span>
+        {/* 🔥 API 데이터 테스트 표시 */}
+        <div className="absolute top-2 left-2 bg-white px-3 py-1 rounded-lg shadow-md z-50">
+          <div className="text-sm">
+            <div>카테고리: {activeCategory}</div>
+            <div className="text-xs text-gray-500">
+              API 테스트: 콘솔 확인
             </div>
           </div>
-        )}
-
-        {error && (
-          <div className="absolute top-2 left-2 bg-red-100 px-3 py-1 rounded-full shadow-md z-50">
-            <span className="text-sm text-red-600">⚠️ 데이터 로딩 실패</span>
-          </div>
-        )}
-
-        {/* 🔥 스팟 개수 표시 */}
-        {!loading && spots.length > 0 && (
-          <div className="absolute top-2 right-2 bg-white px-3 py-1 rounded-full shadow-md z-50">
-            <span className="text-sm font-medium text-gray-700">
-              📍 {spots.length}개 스팟
-            </span>
-          </div>
-        )}
+        </div>
 
         {/* 로컬딜 마커들 */}
         {showLocalDeals && (
@@ -202,35 +173,20 @@ const MapView = () => {
         />
       </div>
 
-      {/* 🔥 선택된 스팟 정보 표시 */}
+      {/* 선택된 스팟 정보 */}
       {selectedSpot && (
-        <div className="absolute bottom-2 left-2 right-2 bg-white rounded-lg shadow-lg p-3 z-40 mx-2">
+        <div className="absolute bottom-2 left-2 right-2 bg-white rounded-lg shadow-lg p-3 z-40">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <div className="flex items-center space-x-2 mb-1">
-                <h3 className="font-semibold text-gray-900">{selectedSpot.name}</h3>
-                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
-                  {selectedSpot.category === 'experience' ? '체험' :
-                   selectedSpot.category === 'culture' ? '문화' :
-                   selectedSpot.category === 'restaurant' ? '맛집' : '카페'}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-1">{selectedSpot.address}</p>
-              <div className="flex items-center space-x-3 text-xs">
-                {selectedSpot.price_range && (
-                  <span className="text-blue-600 font-medium">{selectedSpot.price_range}</span>
-                )}
-                {selectedSpot.rating && (
-                  <span className="text-gray-500">⭐ {selectedSpot.rating}</span>
-                )}
-                {selectedSpot.review_count && (
-                  <span className="text-gray-400">({selectedSpot.review_count})</span>
-                )}
-              </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">{selectedSpot.name}</h3>
+              <p className="text-sm text-gray-600">{selectedSpot.address}</p>
+              {selectedSpot.price_range && (
+                <p className="text-sm text-blue-600">{selectedSpot.price_range}</p>
+              )}
             </div>
             <button 
               onClick={() => setSelectedSpot(null)}
-              className="text-gray-400 hover:text-gray-600 ml-2 p-1"
+              className="text-gray-400 hover:text-gray-600"
             >
               ✕
             </button>
