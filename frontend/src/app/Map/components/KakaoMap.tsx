@@ -237,26 +237,19 @@ const KakaoMap = ({
 
         // 🔥 마커 클릭 이벤트 - 화면 좌표 계산 포함
         window.kakao.maps.event.addListener(marker, 'click', () => {
-          console.log('📍 [KakaoMap] 스팟 클릭:', spot.name);
-          
-          if (onSpotClick) {
-            // 화면 좌표 계산
-            const screenPosition = getScreenPosition(position);
-            
-            if (screenPosition) {
-              console.log('🎯 [KakaoMap] 화면 좌표:', screenPosition);
-              onSpotClick(spot, screenPosition);
-            } else {
-              // 좌표 계산 실패 시 화면 중앙에 표시
-              const fallbackPosition = {
-                x: window.innerWidth / 2,
-                y: window.innerHeight / 2
-              };
-              console.warn('⚠️ [KakaoMap] 좌표 계산 실패 - 중앙에 표시');
-              onSpotClick(spot, fallbackPosition);
-            }
-          }
-        });
+  console.log('📍 [KakaoMap] 스팟 클릭:', spot.name);
+  
+  if (onSpotClick) {
+    // 🔥 테스트용: 고정 위치에 툴팁 표시
+    const testPosition = {
+      x: 200,  // 화면 왼쪽에서 200px
+      y: 150   // 화면 위에서 150px
+    };
+    
+    console.log('🎯 [KakaoMap] 테스트 위치:', testPosition);
+    onSpotClick(spot, testPosition);
+  }
+});
 
         console.log('📍 [KakaoMap] 스팟 마커 생성:', spot.name, spot.category);
       } catch (err) {

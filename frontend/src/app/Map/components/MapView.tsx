@@ -1,7 +1,7 @@
-// src/app/Map/components/MapView.tsx - 툴팁 인라인 구현 버전
+// src/app/Map/components/MapView.tsx - 무한 리렌더링 문제 해결
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Navigation, Tag, X } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
 import BottomSheet from './BottomSheet';
@@ -28,6 +28,53 @@ const MapView = () => {
 
   // 훅으로 데이터 가져오기
   const { spots, loading, error } = useLocalSpots(activeCategory, 100);
+
+  // 🔥 스팟 클릭 핸들러 - useCallback으로 참조 안정화
+  const handleSpotClick = useCallback((spot: LocalSpot, screenPosition?: { x: number; y: number }) => {
+  console.log('🏪 [MapView] 스팟 클릭:', spot.name, screenPosition);
+  
+    // 🔥 툴팁 표시
+    setTooltipSpot(spot);
+    setTooltipPosition(screenPosition || null);
+    
+    // 🔥 동시에 바텀시트 상세모드로 전환
+    setSelectedSpot(spot);
+    setBottomSheetHeight(400);
+  }, []);
+
+  // 🔥 툴팁 닫기 핸들러 - useCallback으로 참조 안정화
+  const handleTooltipClose = useCallback(() => {
+    console.log('❌ [MapView] 툴팁 닫기');
+    setTooltipSpot(null);
+    setTooltipPosition(null);
+  }, []);
+
+  // 🔥 지도 클릭 핸들러 - useCallback으로 참조 안정화
+  const handleMapClick = useCallback(() => {
+    console.log('🗺️ [MapView] 지도 클릭 - 툴팁 및 바텀시트 리셋');
+    setBottomSheetHeight(120);
+    setSelectedSpot(null);
+    setTooltipSpot(null);
+    setTooltipPosition(null);
+  }, []);
+
+  // 🔥 뒤로가기 핸들러 - useCallback으로 참조 안정화
+  const handleBackToList = useCallback(() => {
+    console.log('🔙 [MapView] 리스트 모드로 복귀');
+    setSelectedSpot(null);
+    setBottomSheetHeight(180);
+  }, []);
+
+  // 🔥 바텀시트 스팟 클릭 핸들러 - useCallback으로 참조 안정화
+  const handleBottomSheetSpotClick = useCallback((spot: LocalSpot) => {
+    console.log('🏪 [MapView] 바텀시트에서 스팟 클릭:', spot.name);
+    setSelectedSpot(spot);
+    setBottomSheetHeight(400); // 상세보기 모드로 높이 조정
+    
+    // 툴팁 닫기
+    setTooltipSpot(null);
+    setTooltipPosition(null);
+  }, []);
 
   // 드래그 이벤트 처리
   useEffect(() => {
@@ -59,37 +106,6 @@ const MapView = () => {
     setIsDragging(true);
     setStartY(clientY);
     setStartHeight(bottomSheetHeight);
-  };
-
-  // 지도 클릭 시 툴팁과 바텀시트 모두 리셋
-  const handleMapClick = () => {
-    console.log('🗺️ [MapView] 지도 클릭 - 툴팁 및 바텀시트 리셋');
-    setBottomSheetHeight(120);
-    setSelectedSpot(null);
-    setTooltipSpot(null);
-    setTooltipPosition(null);
-  };
-
-  // 스팟 클릭 핸들러 (툴팁 표시용)
-  const handleSpotClick = (spot: LocalSpot, screenPosition?: { x: number; y: number }) => {
-    console.log('🏪 [MapView] 스팟 클릭 (툴팁):', spot.name, screenPosition);
-    
-    setTooltipSpot(spot);
-    setTooltipPosition(screenPosition || null);
-  };
-
-  // 툴팁 닫기 핸들러
-  const handleTooltipClose = () => {
-    console.log('❌ [MapView] 툴팁 닫기');
-    setTooltipSpot(null);
-    setTooltipPosition(null);
-  };
-
-  // 뒤로가기 핸들러 (바텀시트 상세보기 모드용)
-  const handleBackToList = () => {
-    console.log('🔙 [MapView] 리스트 모드로 복귀');
-    setSelectedSpot(null);
-    setBottomSheetHeight(180);
   };
 
   const handleGPSClick = (e: React.MouseEvent) => {
@@ -153,7 +169,7 @@ const MapView = () => {
           onMapClick={handleMapClick}
           showCurrentLocation={true}
           spots={spots}
-          onSpotClick={handleSpotClick}
+          onSpotClick={handleSpotClick} // 🔥 이제 안정화된 참조
         />
 
         {/* 툴팁 - 지도 영역 안에 위치 */}
@@ -210,6 +226,9 @@ const MapView = () => {
               <button 
                 onClick={() => {
                   console.log('상세정보 보기:', tooltipSpot.name);
+                  // 🔥 바텀시트 상세모드로 전환
+                  setSelectedSpot(tooltipSpot);
+                  setBottomSheetHeight(400);
                   handleTooltipClose();
                 }}
                 className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs py-2 px-3 rounded-md transition-colors font-medium"
@@ -257,27 +276,6 @@ const MapView = () => {
           </div>
         )}
 
-        {/* 로컬딜 마커들 */}
-        {showLocalDeals && (
-          <>
-            <div className="absolute top-1/3 left-1/3 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="bg-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
-                <Tag className="w-3 h-3 text-white" />
-              </div>
-            </div>
-            <div className="absolute top-2/3 right-1/3 transform translate-x-1/2 -translate-y-1/2 pointer-events-none">
-              <div className="bg-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
-                <Tag className="w-3 h-3 text-white" />
-              </div>
-            </div>
-            <div className="absolute bottom-1/3 left-1/2 transform -translate-x-1/2 translate-y-1/2 pointer-events-none">
-              <div className="bg-red-500 rounded-full p-1.5 shadow-lg animate-pulse">
-                <Tag className="w-3 h-3 text-white" />
-              </div>
-            </div>
-          </>
-        )}
-
         {/* 플로팅 버튼들 */}
         <button 
           className="absolute left-3 bg-white rounded-full p-2.5 shadow-lg hover:shadow-xl transition-all z-30"
@@ -316,6 +314,7 @@ const MapView = () => {
           loading={loading}
           selectedSpot={selectedSpot}
           onBackToList={handleBackToList}
+          onSpotClick={handleBottomSheetSpotClick} // 🔥 바텀시트용 핸들러 추가
         />
 
         {/* CSS 애니메이션 */}
