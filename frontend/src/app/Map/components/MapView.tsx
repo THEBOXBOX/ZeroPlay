@@ -174,11 +174,13 @@ const MapView = () => {
 
         {/* 툴팁 - 지도 영역 안에 위치 */}
         {tooltipSpot && tooltipPosition && (
+          
           <div
             className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-72 max-w-xs"
             style={{
-              left: `${Math.min(Math.max(tooltipPosition.x - 140, 16), window.innerWidth - 300)}px`,
-              top: `${Math.max(tooltipPosition.y - 130, 16)}px`,
+              // 🔥 임시로 화면 상단 고정
+              left: `50px`,
+              top: `50px`,
               animation: 'fadeIn 0.2s ease-out'
             }}
           >

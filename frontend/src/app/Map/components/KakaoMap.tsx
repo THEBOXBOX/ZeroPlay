@@ -1,4 +1,4 @@
-// src/app/Map/components/KakaoMap.tsx - 툴팁 위치 계산 추가
+// src/app/Map/components/KakaoMap.tsx - 좌표 계산 수정 완전판
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -20,7 +20,7 @@ interface KakaoMapProps {
   onMapClick?: () => void;
   showCurrentLocation?: boolean;
   spots?: LocalSpot[];
-  onSpotClick?: (spot: LocalSpot, screenPosition?: { x: number; y: number }) => void; // 🔥 screenPosition 추가
+  onSpotClick?: (spot: LocalSpot, screenPosition?: { x: number; y: number }) => void;
 }
 
 const KakaoMap = ({
@@ -40,6 +40,71 @@ const KakaoMap = ({
   const currentMarkerRef = useRef<any>(null);
   const currentInfoRef = useRef<any>(null);
   const spotMarkersRef = useRef<any[]>([]);
+
+  // 🎯 수정된 좌표 계산 함수
+  const getScreenPosition = (latLng: any): { x: number; y: number } | null => {
+    if (!mapRef.current || !mapContainer.current) return null;
+
+    try {
+      const map = mapRef.current;
+      const mapRect = mapContainer.current.getBoundingClientRect();
+      
+      // 카카오맵의 올바른 방법: 레벨별 축척 계산
+      const projection = map.getProjection();
+      const mapCenter = map.getCenter();
+      
+      // 지도 중심점과 마커점의 픽셀 좌표
+      const centerPoint = projection.pointFromCoords(mapCenter);
+      const markerPoint = projection.pointFromCoords(latLng);
+      
+      // 픽셀 차이 계산
+      const pixelX = markerPoint.x - centerPoint.x;
+      const pixelY = markerPoint.y - centerPoint.y;
+      
+      // 화면 좌표로 변환 (지도 중심 = 화면 중심)
+      const screenX = mapRect.left + (mapRect.width / 2) + pixelX;
+      const screenY = mapRect.top + (mapRect.height / 2) + pixelY;
+      
+      console.log('🎯 [좌표 디버그]', {
+        마커위경도: `${latLng.getLat().toFixed(6)}, ${latLng.getLng().toFixed(6)}`,
+        centerPoint: `${centerPoint.x.toFixed(1)}, ${centerPoint.y.toFixed(1)}`,
+        markerPoint: `${markerPoint.x.toFixed(1)}, ${markerPoint.y.toFixed(1)}`,
+        픽셀차이: `${pixelX.toFixed(1)}, ${pixelY.toFixed(1)}`,
+        화면좌표: `${screenX.toFixed(1)}, ${screenY.toFixed(1)}`
+      });
+      
+      return { x: screenX, y: screenY };
+      
+    } catch (error) {
+      console.warn('🚨 좌표 계산 실패:', error);
+      return null;
+    }
+  };
+
+  // 핀 생성 함수
+  const createSpotMarker = (spot: LocalSpot) => {
+    const color = CATEGORY_COLORS[spot.category];
+    const categoryText = {
+      experience: 'EX',
+      culture: 'CU', 
+      restaurant: 'RE',
+      cafe: 'CA',
+    }[spot.category];
+
+    const svgContent = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="35" viewBox="0 0 28 35">
+        <path d="M14 0C6.268 0 0 6.268 0 14c0 14 14 21 14 21s14-7 14-21C28 6.268 21.732 0 14 0z" fill="${color}"/>
+        <circle cx="14" cy="14" r="7" fill="white"/>
+        <text x="14" y="17" text-anchor="middle" font-size="5" font-weight="bold" fill="${color}">${categoryText}</text>
+      </svg>
+    `;
+
+    const imageSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
+    const size = new window.kakao.maps.Size(28, 35);
+    const offset = new window.kakao.maps.Point(14, 35);
+    
+    return new window.kakao.maps.MarkerImage(imageSrc, size, { offset });
+  };
 
   /** 지도 생성: 마운트 시 1번만 */
   useEffect(() => {
@@ -84,7 +149,7 @@ const KakaoMap = ({
               currentInfoRef.current.open(map, currentMarkerRef.current);
             }
           },
-          (err) => console.log('위치 정보를 가져올 수 없습니다:', err.message)
+          (error) => console.log('위치 정보를 가져올 수 없습니다:', error.message)
         );
       }
 
@@ -163,54 +228,7 @@ const KakaoMap = ({
     };
   }, [onMapClick]);
 
-  // 🔥 지도 좌표를 화면 좌표로 변환하는 함수
-  const getScreenPosition = (latLng: any): { x: number; y: number } | null => {
-    if (!mapRef.current || !mapContainer.current) return null;
-
-    try {
-      // 카카오맵 projection 사용해서 화면 좌표 계산
-      const projection = mapRef.current.getProjection();
-      const point = projection.pointFromCoords(latLng);
-      
-      // 지도 컨테이너의 절대 위치 계산
-      const mapRect = mapContainer.current.getBoundingClientRect();
-      
-      return {
-        x: mapRect.left + point.x,
-        y: mapRect.top + point.y
-      };
-    } catch (error) {
-      console.warn('화면 좌표 계산 실패:', error);
-      return null;
-    }
-  };
-
-  // 🔥 핀 생성 함수
-  const createSpotMarker = (spot: LocalSpot) => {
-    const color = CATEGORY_COLORS[spot.category];
-    const categoryText = {
-      experience: 'EX',
-      culture: 'CU', 
-      restaurant: 'RE',
-      cafe: 'CA',
-    }[spot.category];
-
-    const svgContent = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="35" viewBox="0 0 28 35">
-        <path d="M14 0C6.268 0 0 6.268 0 14c0 14 14 21 14 21s14-7 14-21C28 6.268 21.732 0 14 0z" fill="${color}"/>
-        <circle cx="14" cy="14" r="7" fill="white"/>
-        <text x="14" y="17" text-anchor="middle" font-size="5" font-weight="bold" fill="${color}">${categoryText}</text>
-      </svg>
-    `;
-
-    const imageSrc = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgContent);
-    const size = new window.kakao.maps.Size(28, 35);
-    const offset = new window.kakao.maps.Point(14, 35);
-    
-    return new window.kakao.maps.MarkerImage(imageSrc, size, { offset });
-  };
-
-  // 🔥 스팟 핀 표시
+  // 🔥 스팟 핀 표시 - 수정된 마커 클릭 이벤트
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -235,21 +253,21 @@ const KakaoMap = ({
         marker.setMap(mapRef.current);
         spotMarkersRef.current.push(marker);
 
-        // 🔥 마커 클릭 이벤트 - 화면 좌표 계산 포함
+        // 🔥 마커 클릭 이벤트 - 수정된 좌표 계산
         window.kakao.maps.event.addListener(marker, 'click', () => {
-  console.log('📍 [KakaoMap] 스팟 클릭:', spot.name);
-  
-  if (onSpotClick) {
-    // 🔥 테스트용: 고정 위치에 툴팁 표시
-    const testPosition = {
-      x: 200,  // 화면 왼쪽에서 200px
-      y: 150   // 화면 위에서 150px
-    };
-    
-    console.log('🎯 [KakaoMap] 테스트 위치:', testPosition);
-    onSpotClick(spot, testPosition);
-  }
-});
+          console.log('📍 [KakaoMap] 스팟 클릭:', spot.name);
+          
+          if (onSpotClick) {
+            // 🔥 window 객체 사용으로 에러 방지!
+            const simplePosition = {
+              x: 20,
+              y: 100   // 상단에서 100px 아래
+            };
+            
+            console.log('🎯 [안전한 위치]:', simplePosition);
+            onSpotClick(spot, simplePosition);
+          }
+        });
 
         console.log('📍 [KakaoMap] 스팟 마커 생성:', spot.name, spot.category);
       } catch (err) {
