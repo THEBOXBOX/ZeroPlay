@@ -11,9 +11,16 @@ interface Message {
 
 interface ChatBotProps {
   onRouteGenerated?: (routeData: any) => void;
+  filters?: {
+    budget: string;
+    duration: string;
+    companions: string;
+    interests: string[];
+    region: string;
+  };
 }
 
-export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
+export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -46,6 +53,7 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputValue;
     setInputValue('');
     setIsLoading(true);
 
@@ -54,73 +62,131 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
       inputRef.current.blur();
     }
 
-    // AI 응답 시뮬레이션
-    setTimeout(() => {
+    try {
+      // AI API 호출
+      const response = await fetch('http://localhost:3001/api/ai/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          message: currentInput,
+          sessionId: 'session_' + Date.now()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('AI 응답 실패');
+      }
+
+      const result = await response.json();
+      
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         type: 'bot',
-        content: getAIResponse(inputValue),
+        content: result.data?.message || '응답을 받을 수 없습니다.',
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, botResponse]);
-      setIsLoading(false);
 
-      // 코스 생성 시뮬레이션
-      if (inputValue.includes('추천') || inputValue.includes('코스')) {
-        setTimeout(() => {
-          onRouteGenerated?.({
-            id: Date.now(),
-            title: '속초 맛집 투어 코스',
-            duration: '8시간',
-            totalBudget: 75000,
-            places: [
-              { 
-                name: '강릉 커피 빌리지', 
-                type: 'cafe', 
-                duration: '2시간',
-                cost: 12000,
-                description: '바다를 보며 즐기는 프리미엄 커피'
-              },
-              { 
-                name: '안목해변 카페거리', 
-                type: 'cafe', 
-                duration: '1시간 30분',
-                cost: 8000,
-                description: '커피와 바다가 만나는 로맨틱 카페거리'
-              },
-              { 
-                name: '속초 중앙시장', 
-                type: 'food', 
-                duration: '3시간',
-                cost: 25000,
-                description: '속초의 신선한 해산물과 전통 음식'
-              },
-              { 
-                name: '테라로사 강릉본점', 
-                type: 'cafe', 
-                duration: '1시간 30분',
-                cost: 25000,
-                description: '강릉을 대표하는 스페셜티 커피 성지'
-              }
-            ],
-            highlights: ['맛집투어', '카페', '바다뷰', '포토스팟'],
-            difficulty: 'easy'
-          });
+      // 코스 생성 트리거 (특정 키워드가 포함된 경우)
+      if (currentInput.includes('추천') || currentInput.includes('코스') || currentInput.includes('여행')) {
+        setTimeout(async () => {
+          await generateTravelRoutes(currentInput);
         }, 2000);
       }
-    }, 1000 + Math.random() * 2000);
+
+    } catch (error) {
+      console.error('AI 채팅 에러:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'bot',
+        content: '죄송합니다. 일시적인 오류가 발생했습니다. 다시 시도해주세요.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getAIResponse = (userInput: string): string => {
-    const responses = [
-      '좋은 선택이네요! 🎯\n더 구체적인 정보를 알려주시면\n맞춤 코스를 추천해드릴게요.',
-      '그 지역은 정말 멋진 곳이에요! ✨\n어떤 컨셉의 여행을 원하시나요?\n(맛집, 카페, 관광, 힐링 등)',
-      '예산과 동행인에 대해서도\n알려주시면 더 정확한\n추천이 가능해요! 💡',
-      '잠시만요, 최적의 여행 코스를\n찾고 있어요! 🔍\n곧 완성될 예정입니다.',
-      '완벽한 여행 코스를 생성했어요! 🎉\n하단의 [추천 결과] 탭에서\n확인해보세요!'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+  const generateTravelRoutes = async (userMessage: string) => {
+    try {
+      setIsLoading(true);
+      
+      // props로 전달받은 필터 사용
+      const requestFilters = filters || {
+        budget: '',
+        duration: '',
+        companions: '',
+        interests: [],
+        region: ''
+      };
+
+      const response = await fetch('http://localhost:3001/api/ai/generate-routes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          message: userMessage,
+          filters: requestFilters,
+          sessionId: 'session_' + Date.now()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('코스 생성 실패');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data.routes?.length > 0) {
+        // 각 루트를 개별적으로 전달
+        result.data.routes.forEach((route: any, index: number) => {
+          setTimeout(() => {
+            onRouteGenerated?.({
+              id: route.id || `ai_route_${Date.now()}_${index}`,
+              title: route.title,
+              duration: route.duration,
+              totalBudget: route.totalBudget,
+              places: route.places || [],
+              highlights: route.highlights || [],
+              difficulty: route.difficulty || 'easy'
+            });
+          }, index * 500); // 각 코스를 0.5초 간격으로 추가
+        });
+
+        const successMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          type: 'bot',
+          content: `${result.data.routes.length}개의 맞춤 여행 코스를 생성했어요! 🎉\n하단의 [추천 결과] 탭에서\n확인해보세요!`,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, successMessage]);
+      } else {
+        const noRouteMessage: Message = {
+          id: (Date.now() + 2).toString(),
+          type: 'bot',
+          content: '조건에 맞는 여행 코스를 찾을 수 없습니다.\n다른 조건으로 다시 시도해보세요! 🔍',
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, noRouteMessage]);
+      }
+
+    } catch (error) {
+      console.error('코스 생성 에러:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        type: 'bot',
+        content: '코스 생성 중 문제가 발생했습니다.\n조건을 다시 설정해보세요.',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -138,13 +204,10 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
   };
 
   const quickQuestions = [
-    '무엇을 도와드릴까요?',
-    '새로운 여행 계획을 세우려고 합니다',
-    '무엇을 도와드릴까요?',
-    '무엇을 도와드릴까요?',
-    '새로운 여행 계획을 세우려고 합니다',
-    '무엇을 도와드릴까요?',
-    '새로운 여행 계획을 세우려고 합니다'
+    '서울에서 데이트 코스 추천해주세요',
+    '부산 맛집 투어를 계획하고 있어요',
+    '제주도 자연 힐링 여행 추천',
+    '친구들과 즐길 수 있는 서울 명소'
   ];
 
   return (
@@ -211,10 +274,10 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 빠른 응답 버튼들 - 와이어프레임의 3번째 이미지 참고 */}
+      {/* 빠른 응답 버튼들 */}
       <div className="px-4 py-3 bg-gray-50 border-t">
         <div className="space-y-2">
-          {quickQuestions.slice(0, Math.min(4, quickQuestions.length)).map((question, index) => (
+          {quickQuestions.slice(0, 4).map((question, index) => (
             <div key={index} className="flex justify-between items-center">
               {index % 2 === 0 ? (
                 // 좌측 버튼 (봇)
@@ -228,12 +291,12 @@ export default function ChatBot({ onRouteGenerated }: ChatBotProps) {
                     </div>
                     <span className="text-sm text-gray-700 text-left">{question}</span>
                   </button>
-                  <div className="w-8 h-8"></div> {/* 우측 공간 */}
+                  <div className="w-8 h-8"></div>
                 </>
               ) : (
                 // 우측 버튼 (유저)
                 <>
-                  <div className="w-8 h-8"></div> {/* 좌측 공간 */}
+                  <div className="w-8 h-8"></div>
                   <button
                     onClick={() => handleQuickQuestion(question)}
                     className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-2xl transition-colors shadow-sm flex items-center max-w-[75%]"

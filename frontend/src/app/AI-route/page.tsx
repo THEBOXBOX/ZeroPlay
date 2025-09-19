@@ -125,7 +125,10 @@ export default function AIRoutePage() {
                 <span className="text-sm font-medium text-blue-700">AI 여행 추천</span>
               </div>
             </div>
-            <ChatBot onRouteGenerated={handleRouteGenerated} />
+            <ChatBot 
+              onRouteGenerated={handleRouteGenerated} 
+              filters={filters}
+            />
           </div>
         )}
 

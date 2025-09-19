@@ -50,13 +50,12 @@ const interestOptions = [
 
 const regionOptions = [
   { value: 'seoul', label: '서울', icon: '🏙️' },
-  { value: 'busan', label: '부산', icon: '🌊' },
+  { value: 'sudogwon', label: '수도권', icon: '🏘️' },
   { value: 'gangwon', label: '강원도', icon: '⛰️' },
-  { value: 'gyeonggi', label: '경기도', icon: '🏘️' },
-  { value: 'jeju', label: '제주도', icon: '🌺' },
+  { value: 'chungcheong', label: '충청도', icon: '🌸' },
   { value: 'gyeongsang', label: '경상도', icon: '🏯' },
   { value: 'jeolla', label: '전라도', icon: '🌾' },
-  { value: 'chungcheong', label: '충청도', icon: '🌸' }
+  { value: 'jeju', label: '제주도', icon: '🌺' }
 ];
 
 export default function FilterButtons({ filters, onFilterChange }: FilterButtonsProps) {

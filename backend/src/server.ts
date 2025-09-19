@@ -9,6 +9,7 @@ import travelRoutes from './routes/travel';
 import benefitRoutes from './routes/benefit';
 import testRoutes from './routes/test';
 import photoRouter from './routes/photo';
+import aiRoutes from './routes/ai';
 
 // Supabase 연결 테스트
 import { testSupabaseConnection } from './config/supabase';
@@ -37,6 +38,7 @@ app.use('/api/travel', travelRoutes);
 app.use('/api/benefits', benefitRoutes);  // 복수형으로 통일
 app.use('/api/test', testRoutes);
 app.use('/api', photoRouter);
+app.use('/api/ai', aiRoutes);
 
 // Health check (강화된 버전)
 app.get('/api/health', async (req, res) => {
@@ -68,7 +70,10 @@ app.use('*', (req, res) => {
       'GET /api/benefits',
       'POST /api/travel/recommend',
       'GET /api/travel/local-experiences/:region',
-      'GET /api/travel/destination/:id'
+      'GET /api/travel/destination/:id',
+      'POST /api/ai/chat',
+      'POST /api/ai/generate-routes', 
+      'GET /api/ai/search-places'
     ]
   });
 });

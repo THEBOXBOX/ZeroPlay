@@ -35,6 +35,43 @@ export class ApiClient {
     }
   }
 
+  // AI 채팅 API
+static async chatWithAI(message: string, sessionId?: string) {
+  return this.request('/ai/chat', {
+    method: 'POST',
+    body: JSON.stringify({ message, sessionId }),
+  });
+}
+
+// AI 코스 생성 API
+static async generateAIRoutes(message: string, filters: any, sessionId?: string) {
+  return this.request('/ai/generate-routes', {
+    method: 'POST',
+    body: JSON.stringify({ message, filters, sessionId }),
+  });
+}
+
+// 필터 기반 장소 검색 API
+static async searchPlaces(filters: any) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      params.append(key, value.join(','));
+    } else if (value) {
+      params.append(key, String(value));
+    }
+  });
+  return this.request(`/ai/search-places?${params.toString()}`);
+}
+
+// 코스 평가 API
+static async rateRoute(routeId: string, rating: number, feedback?: string, sessionId?: string) {
+  return this.request('/ai/rate-route', {
+    method: 'POST',
+    body: JSON.stringify({ routeId, rating, feedback, sessionId }),
+  });
+}
+
   // 여행 추천 API (기존 엔드포인트 사용)
   static async getRecommendations(data: any) {
     return this.request('/travel/recommend', {
