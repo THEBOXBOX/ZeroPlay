@@ -1,10 +1,26 @@
-// src/app/Map/components/BottomSheet.tsx - 상세정보 모드 추가
+// src/app/Map/components/BottomSheet.tsx - 완전한 구조
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Bookmark, Navigation, MapPin, Tag, Phone, Clock, Star, ArrowLeft, ExternalLink, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Heart, 
+  Navigation, 
+  MapPin, 
+  Tag, 
+  Phone, 
+  Clock, 
+  Star, 
+  ArrowLeft, 
+  ExternalLink, 
+  Share2,
+  Bookmark 
+} from 'lucide-react';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
+import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
 
+// Props 인터페이스
 interface BottomSheetProps {
   showBottomSheet: boolean;
   setShowBottomSheet: (show: boolean) => void;
@@ -24,6 +40,31 @@ interface BottomSheetProps {
   onSpotClick?: (spot: LocalSpot) => void;
 }
 
+const generateTempUserId = (): string => {
+    // 브라우저에서만 실행되도록 체크
+    if (typeof window !== 'undefined' && 'crypto' in window && 'randomUUID' in window.crypto) {
+      return window.crypto.randomUUID();
+    }
+    // 폴백: 간단한 UUID v4 생성
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
+  // 🔥 로컬스토리지에서 사용자 ID 가져오기 또는 생성
+  const getUserId = (): string => {
+    if (typeof window === 'undefined') return '00000000-0000-4000-8000-000000000000';
+    
+    let userId = localStorage.getItem('temp_user_id');
+    if (!userId) {
+      userId = generateTempUserId();
+      localStorage.setItem('temp_user_id', userId);
+    }
+    return userId;
+  };
+
 const BottomSheet: React.FC<BottomSheetProps> = ({
   showBottomSheet,
   setShowBottomSheet,
@@ -42,10 +83,131 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   onBackToList,
   onSpotClick,
 }) => {
-  // 🔥 모드 판단: selectedSpot이 있으면 상세정보 모드
+  // ================================
+  // 🔥 모든 State를 컴포넌트 최상위에 위치
+  // ================================
+  const [isSpotBookmarked, setIsSpotBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // 임시 사용자 ID (실제로는 인증 시스템에서 가져와야 함)
+  const userId = getUserId();
+
+  // ================================
+  // 🔥 useEffect - 북마크 상태 확인
+  // ================================
+  useEffect(() => {
+    const checkBookmarkStatus = async () => {
+      if (!selectedSpot) {
+        setIsSpotBookmarked(false);
+        setCurrentImageIndex(0);
+        return;
+      }
+      
+      console.log('🔍 북마크 상태 확인 중...', {
+        userId,
+        spotId: selectedSpot.id,
+        spotName: selectedSpot.name
+      });
+
+      try {
+        const result = await isBookmarked(userId, selectedSpot.id, 'spot');
+        console.log('✅ 북마크 확인 결과:', result);
+        
+        if (result.success) {
+          setIsSpotBookmarked(result.isBookmarked || false);
+        } else {
+          console.error('❌ 북마크 확인 실패:', result.error);
+        }
+        setCurrentImageIndex(0);
+      } catch (error) {
+        console.error('💥 북마크 상태 확인 오류:', error);
+      }
+    };
+
+    checkBookmarkStatus();
+  }, [selectedSpot?.id, userId]);
+
+  // ================================
+  // 🔥 핸들러 함수들
+  // ================================
+  
+  // 북마크 토글 함수
+  const handleBookmarkToggle = async () => {
+    if (!selectedSpot) return;
+    
+    console.log('🔖 북마크 토글 시작:', {
+      userId,
+      spotId: selectedSpot.id,
+      spotName: selectedSpot.name
+    });
+    setBookmarkLoading(true);
+    
+    try {
+      const result = await toggleBookmark(userId, selectedSpot.id, 'spot');
+      
+      console.log('🔖 북마크 토글 결과:', result);
+
+      if (result.success) {
+        setIsSpotBookmarked(result.isBookmarked || false);
+        
+        const message = result.isBookmarked ? 
+          `${selectedSpot.name}이(가) 북마크에 추가되었습니다.` : 
+          `${selectedSpot.name}이(가) 북마크에서 제거되었습니다.`;
+        
+        console.log('✅', message);
+
+      } else {
+        console.error('북마크 처리 실패:', result.error);
+        alert(result.error || '북마크 처리 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('북마크 토글 오류:', error);
+      alert('북마크 처리 중 오류가 발생했습니다.');
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
+
+  // 이미지 네비게이션 함수들
+  const goToPrevImage = () => {
+    if (!selectedSpot?.images) return;
+    setCurrentImageIndex(prev => 
+      prev === 0 ? selectedSpot.images!.length - 1 : prev - 1
+    );
+  };
+
+  const goToNextImage = () => {
+    if (!selectedSpot?.images) return;
+    setCurrentImageIndex(prev => 
+      prev === selectedSpot.images!.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  // 터치 이벤트 핸들러
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    e.preventDefault();
+    
+    const screenHeight = window.innerHeight || 852;
+    const maxHeight = Math.min(screenHeight * 0.8, 680); // 최대 680px
+    const minHeight = 120;
+    
+    const deltaY = startY - e.touches[0].clientY;
+    const newHeight = Math.min(Math.max(startHeight + deltaY, minHeight), maxHeight);
+    setBottomSheetHeight(newHeight);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+  };
+
+  // ================================
+  // 🔥 유틸리티 함수들
+  // ================================
+  
   const isDetailMode = !!selectedSpot;
 
-  // 실제 데이터 필터링 (리스트 모드용)
   const getDisplayData = (): LocalSpot[] => {
     if (showLocalDeals) {
       return spots;
@@ -66,9 +228,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     }
   };
 
-  const displayData = getDisplayData();
-  
-  // 카테고리 관련 함수들
   const getCategoryIcon = (category: LocalSpot['category']) => {
     const icons = {
       experience: '🎨',
@@ -96,229 +255,171 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     }
   };
 
-  // 터치 이벤트 핸들러
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || !containerRef.current) return;
-    e.preventDefault();
-    
-    const maxHeight = 500;
-    const deltaY = startY - e.touches[0].clientY;
-    const newHeight = Math.min(Math.max(startHeight + deltaY, 120), maxHeight);
-    setBottomSheetHeight(newHeight);
-  };
+  // ================================
+  // 🔥 컴포넌트들
+  // ================================
+  
+  // 북마크 버튼 컴포넌트
+  const BookmarkButton = () => (
+    <button 
+      onClick={handleBookmarkToggle}
+      disabled={bookmarkLoading}
+      className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
+        isSpotBookmarked
+          ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
+          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+      } ${bookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      <Bookmark 
+        className={`w-4 h-4 ${
+          isSpotBookmarked ? 'fill-red-500 text-red-500' : 'text-gray-500'
+        }`}
+      />
+      <span>
+        {bookmarkLoading ? '처리중...' : isSpotBookmarked ? '북마크됨' : '북마크'}
+      </span>
+    </button>
+  );
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
-  };
-
-  // 🔥 상세정보 모드 렌더링
+  // ================================
+  // 🔥 렌더링 함수들
+  // ================================
+  
+  // 상세정보 모드 렌더링
   const renderDetailMode = () => {
     if (!selectedSpot) return null;
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     
     const businessStatus = getBusinessStatus(selectedSpot);
     const hasMultipleImages = selectedSpot.images && selectedSpot.images.length > 1;
 
-      // 이미지 네비게이션 함수들
-    const goToPrevImage = () => {
-      if (!selectedSpot.images) return;
-      setCurrentImageIndex(prev => 
-        prev === 0 ? selectedSpot.images!.length - 1 : prev - 1
-      );
-    };
-
-    const goToNextImage = () => {
-      if (!selectedSpot.images) return;
-      setCurrentImageIndex(prev => 
-        prev === selectedSpot.images!.length - 1 ? 0 : prev + 1
-      );
-    };
-
     return (
       <div className="h-full flex flex-col">
-        {/* 헤더 - 뒤로가기 버튼 */}
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center space-x-3">
+        {/* 헤더 */}
+        <div className="flex items-center p-4 border-b border-gray-100">
           <button 
-            onClick={() => {
-              console.log('🔙 뒤로가기 클릭');
-              if (onBackToList) {
-                onBackToList();
-              }
-            }}
-            className="p-1 rounded-full hover:bg-gray-100"
+            onClick={onBackToList}
+            className="mr-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
           </button>
-          <div className="flex-1">
-            <h2 className="text-lg font-bold text-gray-900">{selectedSpot.name}</h2>
-            <span className="text-sm text-gray-500">{getCategoryName(selectedSpot.category)}</span>
-          </div>
-          <button className="p-1 rounded-full hover:bg-gray-100">
-            <Share2 className="w-5 h-5 text-gray-600" />
-          </button>
+          <h3 className="text-lg font-semibold text-gray-900 flex-1">
+            {selectedSpot.name}
+          </h3>
+          <span className={`text-sm font-medium ${businessStatus.color}`}>
+            {businessStatus.status}
+          </span>
         </div>
 
-        {/* 스크롤 가능한 상세 컨텐츠 */}
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
-          {/* 🔥 이미지 갤러리 - 수정된 부분 */}
-          <div className="relative">
-            {selectedSpot.images && selectedSpot.images.length > 0 ? (
-              <div className="h-48 bg-gray-200 relative overflow-hidden group">
-                
+        {/* 스크롤 가능한 내용 */}
+        <div className="flex-1 overflow-y-auto">
+          {/* 이미지 섹션 */}
+          {selectedSpot.images && selectedSpot.images.length > 0 && (
+            <div className="relative">
+              <div className="aspect-video bg-gray-200 overflow-hidden">
                 <img 
-                src={selectedSpot.images[currentImageIndex]}
-                alt={`${selectedSpot.name} - ${currentImageIndex + 1}`}
-                className="w-full h-full object-cover transition-opacity duration-300"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  console.error('Image load failed:', target.src);
-                  target.style.display = 'none';
-                }}
-                onLoad={() => {
-                  console.log('✅ 이미지 로드 성공!', currentImageIndex + 1);
-                }}
-              />
-
-              {/* 좌우 화살표 (이미지가 여러개일 때만) */}
-              {hasMultipleImages && (
-                <>
-                  <button 
-                    onClick={goToPrevImage}
-                    className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  
-                  <button 
-                    onClick={goToNextImage}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </>
-              )}
-
-              {/* 이미지 카운터 */}
-              {hasMultipleImages && (
-                <div className="absolute bottom-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded-full">
-                  {currentImageIndex + 1}/{selectedSpot.images.length}
-                </div>
-              )}
-
-              {/* 🔥 점 인디케이터 (이미지가 여러개일 때) */}
-              {hasMultipleImages && (
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
-                  {selectedSpot.images.map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                        index === currentImageIndex 
-                          ? 'bg-white' 
-                          : 'bg-white bg-opacity-50'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-            ) : (
-              <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-4xl mb-2">{getCategoryIcon(selectedSpot.category)}</div>
-                  <p className="text-gray-600 text-sm">이미지 없음</p>
-                </div>
+                  src={selectedSpot.images[currentImageIndex]} 
+                  alt={selectedSpot.name}
+                  className="w-full h-full object-cover"
+                />
+                
+                {/* 이미지 네비게이션 */}
+                {hasMultipleImages && (
+                  <>
+                    <button 
+                      onClick={goToPrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={goToNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                    
+                    {/* 이미지 인디케이터 */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                      {selectedSpot.images.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentImageIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-colors ${
+                            index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* 기본 정보 */}
           <div className="p-4 space-y-4">
-            {/* 영업 상태 & 가격 */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className={`text-sm font-medium ${businessStatus.color}`}>
-                  {businessStatus.status}
-                </span>
-                {selectedSpot.price_range && (
-                  <span className="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
-                    {selectedSpot.price_range}
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-2">
+                  <span className="text-lg">{getCategoryIcon(selectedSpot.category)}</span>
+                  <span className="text-sm text-blue-600 font-medium">
+                    {getCategoryName(selectedSpot.category)}
                   </span>
-                )}
-              </div>
-              
-              {/* 평점 */}
-              {selectedSpot.rating && (
-                <div className="flex items-center space-x-1">
-                  <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                  <span className="font-medium">{selectedSpot.rating.toFixed(1)}</span>
-                  {selectedSpot.review_count && (
-                    <span className="text-gray-500 text-sm">({selectedSpot.review_count})</span>
+                  {selectedSpot.rating && selectedSpot.rating > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                      <span className="text-sm text-gray-600">
+                        {selectedSpot.rating} ({selectedSpot.review_count || 0})
+                      </span>
+                    </div>
                   )}
                 </div>
-              )}
+                
+                {selectedSpot.description && (
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {selectedSpot.description}
+                  </p>
+                )}
+              </div>
             </div>
 
-            {/* 주소 */}
-            <div className="flex items-start space-x-3">
-              <MapPin className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <p className="text-gray-700">{selectedSpot.address}</p>
-                <button className="text-blue-600 text-sm hover:text-blue-800 mt-1">
-                  길찾기
+            {/* 상세 정보 */}
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                <span className="text-gray-700 text-sm">{selectedSpot.address}</span>
+              </div>
+              
+              {selectedSpot.operating_hours && (
+                <div className="flex items-start space-x-3">
+                  <Clock className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700 text-sm">
+                    {typeof selectedSpot.operating_hours === 'string' 
+                      ? selectedSpot.operating_hours 
+                      : '운영시간 정보'}
+                  </span>
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <button 
+                  onClick={() => {
+                    window.location.href = `tel:02-1234-5678`;
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  02-1234-5678
                 </button>
               </div>
-            </div>
-
-            {/* 설명 */}
-            {selectedSpot.description && (
-              <div className="flex items-start space-x-3">
-                <div className="w-5 h-5 flex items-center justify-center mt-0.5">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                </div>
-                <p className="text-gray-700 leading-relaxed">{selectedSpot.description}</p>
-              </div>
-            )}
-
-            {/* 운영시간 (operating_hours가 있다면) */}
-            {selectedSpot.operating_hours && (
-              <div className="flex items-start space-x-3">
-                <Clock className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-gray-700">운영시간</p>
-                  <p className="text-sm text-gray-500">매일 09:00 - 22:00</p>
-                </div>
-              </div>
-            )}
-
-            {/* 연락처 */}
-            <div className="flex items-center space-x-3">
-              <Phone className="w-5 h-5 text-gray-400 flex-shrink-0" />
-              <button 
-                onClick={() => {
-                  // 전화걸기 기능
-                  window.location.href = `tel:02-1234-5678`;
-                }}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                02-1234-5678
-              </button>
             </div>
           </div>
         </div>
 
-        {/* 🔥 하단 액션 버튼들 */}
+        {/* 하단 액션 버튼들 */}
         <div className="border-t border-gray-100 p-4">
           <div className="flex space-x-3">
-            <button 
-              onClick={() => {
-                console.log('🔖 북마크:', selectedSpot.name);
-              }}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-            >
-              <Bookmark className="w-4 h-4" />
-              <span>북마크</span>
-            </button>
+            <BookmarkButton />
             
             {selectedSpot.reservation_link && (
               <button 
@@ -328,7 +429,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                 className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
               >
                 <ExternalLink className="w-4 h-4" />
-                <span>예약하기</span>
+                <span>사이트 이동</span>
               </button>
             )}
           </div>
@@ -337,8 +438,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     );
   };
 
-  // 🔥 리스트 모드 렌더링 (기존 코드)
+  // 리스트 모드 렌더링
   const renderListMode = () => {
+    const displayData = getDisplayData();
     const titleText = showLocalDeals ? '로컬딜 목록' : `${activeCategory} 목록`;
 
     return (
@@ -377,7 +479,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                     className="flex items-center space-x-3 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
                     onClick={() => {
                       console.log('🏪 바텀시트에서 스팟 클릭:', spot.name);
-                      // 🔥 상세보기 모드로 전환
                       if (onSpotClick) {
                         onSpotClick(spot);
                       }
@@ -441,11 +542,11 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                       </div>
                     </div>
 
-                    {/* 북마크 버튼 */}
+                    {/* 북마크 버튼 (리스트용) */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('🔖 북마크 토글:', spot.name);
+                        console.log('🔖 리스트에서 북마크 토글:', spot.name);
                       }}
                       className="p-2 rounded-full hover:bg-gray-100 transition-colors"
                     >
@@ -461,16 +562,28 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     );
   };
 
+  // ================================
+  // 🔥 메인 렌더링
+  // ================================
+  
+  if (!showBottomSheet) return null;
+
+  const DRAG_HANDLE_HEIGHT = 12;
+  const contentHeight = bottomSheetHeight - DRAG_HANDLE_HEIGHT;
+
   return (
-    <div 
+    <div
       className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-2xl transition-all duration-300 ease-out z-20 ${
         showBottomSheet ? 'translate-y-0' : 'translate-y-full'
       }`}
       style={{ height: `${bottomSheetHeight}px` }}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* 드래그 핸들 */}
       <div 
-        className="flex justify-center py-3 cursor-grab active:cursor-grabbing select-none bg-white rounded-t-2xl touch-none"
+        className="flex justify-center pt-2 pb-1 cursor-grab active:cursor-grabbing"
+        style={{ height: `${DRAG_HANDLE_HEIGHT}px` }}
         onMouseDown={(e) => {
           e.preventDefault();
           handleDragStart(e.clientY);
@@ -481,14 +594,15 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             handleDragStart(e.touches[0].clientY);
           }
         }}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
-        <div className="w-10 h-1.5 bg-gray-300 rounded-full"></div>
+        <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
       </div>
-      
-      {/* 🔥 조건부 렌더링: 상세모드 vs 리스트모드 */}
-      <div style={{ height: `${bottomSheetHeight - 20}px` }}>
+
+      {/* 콘텐츠 */}
+      <div 
+        className="overflow-hidden"
+        style={{ height: `${contentHeight}px` }}
+      >
         {isDetailMode ? renderDetailMode() : renderListMode()}
       </div>
     </div>
