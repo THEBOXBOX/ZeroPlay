@@ -77,7 +77,7 @@ export default function ClientMapPage({ appKey }: { appKey: string }) {
 
       {/* 지도 */}
       <div className="flex-1 overflow-hidden">
-        <MapView appKey={appKey} /> {/* ✅ 여기서 반드시 appKey 전달 */}
+        <MapView/> {/* ✅ 여기서 반드시 appKey 전달 */}
       </div>
 
       {/* 하단 네비 */}

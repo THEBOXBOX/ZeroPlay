@@ -1,7 +1,7 @@
-// src/app/Map/components/BottomSheet.tsx - 로컬딜 통합 버전 (수정)
+// src/app/Map/components/BottomSheet.tsx - 실제 bookmarkUtils에 맞춘 성능 최적화 버전
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -237,10 +237,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 }) => {
   // State
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [bookmarkStatuses, setBookmarkStatuses] = useState<Record<string, boolean>>({});
+  const [bookmarkLoading, setBookmarkLoading] = useState(true);
   
   const userId = getUserId();
 
-  // 로컬딜 관련 헬퍼 함수들
+  // 로컬딜 관련 헬퍼 함수들 (먼저 정의)
   const hasLocalDeal = (spotId: string): boolean => {
     return DUMMY_LOCAL_DEALS.some(deal => deal.spot_id === spotId && deal.is_active);
   };
@@ -249,8 +251,112 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     return DUMMY_LOCAL_DEALS.find(deal => deal.spot_id === spotId && deal.is_active);
   };
 
-  const getLocalDealSpots = (): LocalSpot[] => {
-    return spots.filter(spot => hasLocalDeal(spot.id));
+  // 표시할 데이터 계산 (메모이제이션)
+  const displayData = useMemo((): LocalSpot[] => {
+    if (showLocalDeals) {
+      const localDealSpots = spots.filter(spot => hasLocalDeal(spot.id));
+      console.log('🎟️ 로컬딜 보유 스팟:', localDealSpots.length, '개');
+      return localDealSpots;
+    } else if (activeCategory === '전체') {
+      return spots;
+    } else {
+      const categoryKey = {
+        '체험': 'experience',
+        '문화': 'culture',
+        '맛집': 'restaurant',
+        '카페': 'cafe'
+      }[activeCategory] as keyof typeof CATEGORY_MAP_REVERSE;
+      
+      if (categoryKey) {
+        return spots.filter(spot => spot.category === categoryKey);
+      }
+      return spots;
+    }
+  }, [spots, showLocalDeals, activeCategory]);
+
+  // 북마크 상태 일괄 조회 (성능 최적화 - Promise.all 사용)
+  useEffect(() => {
+    const loadBookmarkStatuses = async () => {
+      if (displayData.length === 0) {
+        setBookmarkLoading(false);
+        return;
+      }
+      
+      try {
+        setBookmarkLoading(true);
+        
+        // 모든 스팟의 북마크 상태를 병렬로 조회
+        const statusPromises = displayData.map(async (spot) => {
+          try {
+            const result = await isBookmarked(userId, spot.id, 'spot');
+            return { 
+              id: spot.id, 
+              isBookmarked: result.success ? (result.isBookmarked || false) : false 
+            };
+          } catch (error) {
+            console.warn(`북마크 상태 조회 실패 (${spot.id}):`, error);
+            return { id: spot.id, isBookmarked: false };
+          }
+        });
+        
+        const results = await Promise.all(statusPromises);
+        const statusMap: Record<string, boolean> = {};
+        results.forEach(({ id, isBookmarked }) => {
+          statusMap[id] = isBookmarked;
+        });
+        setBookmarkStatuses(statusMap);
+        
+      } catch (error) {
+        console.error('북마크 상태 일괄 조회 실패:', error);
+        // 실패 시 모든 항목을 false로 설정
+        const fallbackStatuses: Record<string, boolean> = {};
+        displayData.forEach(spot => {
+          fallbackStatuses[spot.id] = false;
+        });
+        setBookmarkStatuses(fallbackStatuses);
+      } finally {
+        setBookmarkLoading(false);
+      }
+    };
+
+    loadBookmarkStatuses();
+  }, [displayData, userId]);
+
+  // 북마크 토글 핸들러
+  const handleBookmarkToggle = async (spotId: string, currentStatus: boolean) => {
+    try {
+      // UI 즉시 업데이트 (낙관적 업데이트)
+      setBookmarkStatuses(prev => ({
+        ...prev,
+        [spotId]: !currentStatus
+      }));
+
+      // 실제 API 호출
+      const result = await toggleBookmark(userId, spotId, 'spot');
+      
+      if (result.success) {
+        // API 응답으로 실제 상태 업데이트
+        setBookmarkStatuses(prev => ({
+          ...prev,
+          [spotId]: result.isBookmarked || false
+        }));
+      } else {
+        // 실패 시 UI 되돌리기
+        setBookmarkStatuses(prev => ({
+          ...prev,
+          [spotId]: currentStatus
+        }));
+        console.error('북마크 토글 실패:', result.error);
+      }
+      
+    } catch (error) {
+      console.error('북마크 토글 실패:', error);
+      // 실패 시 UI 되돌리기
+      setBookmarkStatuses(prev => ({
+        ...prev,
+        [spotId]: currentStatus
+      }));
+    }
   };
 
   // 로컬딜 쿠폰 받기
@@ -296,28 +402,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   // 유틸리티 함수들
   const isDetailMode = !!selectedSpot;
 
-  const getDisplayData = (): LocalSpot[] => {
-    if (showLocalDeals) {
-      const localDealSpots = getLocalDealSpots();
-      console.log('🎟️ 로컬딜 보유 스팟:', localDealSpots.length, '개');
-      return localDealSpots;
-    } else if (activeCategory === '전체') {
-      return spots;
-    } else {
-      const categoryKey = {
-        '체험': 'experience',
-        '문화': 'culture',
-        '맛집': 'restaurant',
-        '카페': 'cafe'
-      }[activeCategory] as keyof typeof CATEGORY_MAP_REVERSE;
-      
-      if (categoryKey) {
-        return spots.filter(spot => spot.category === categoryKey);
-      }
-      return spots;
-    }
-  };
-
   const getCategoryIcon = (category: LocalSpot['category']) => {
     const icons = {
       experience: '🎨',
@@ -345,7 +429,58 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     }
   };
 
-  // 북마크 버튼 컴포넌트
+  // 경량화된 북마크 버튼 컴포넌트
+  const OptimizedBookmarkButton: React.FC<{
+    spotId: string;
+    variant?: 'default' | 'icon-only';
+    className?: string;
+  }> = ({ spotId, variant = 'default', className = '' }) => {
+    const isBookmarkedState = bookmarkStatuses[spotId] || false;
+    
+    const handleClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      handleBookmarkToggle(spotId, isBookmarkedState);
+    };
+
+    if (variant === 'icon-only') {
+      return (
+        <button 
+          onClick={handleClick}
+          className={`${className}`}
+          disabled={bookmarkLoading}
+        >
+          <Heart 
+            className={`w-5 h-5 transition-colors ${
+              isBookmarkedState 
+                ? 'text-red-500 fill-red-500' 
+                : 'text-gray-400 hover:text-red-400'
+            }`} 
+          />
+        </button>
+      );
+    }
+
+    return (
+      <button 
+        onClick={handleClick}
+        className={`flex items-center space-x-2 px-3 py-2 border rounded-lg transition-colors ${
+          isBookmarkedState 
+            ? 'border-red-200 bg-red-50 text-red-600' 
+            : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+        } ${className}`}
+        disabled={bookmarkLoading}
+      >
+        <Heart 
+          className={`w-4 h-4 ${
+            isBookmarkedState ? 'fill-red-500 text-red-500' : ''
+          }`} 
+        />
+        <span className="text-sm">
+          {isBookmarkedState ? '저장됨' : '저장'}
+        </span>
+      </button>
+    );
+  };
 
   // 상세정보 모드 렌더링
   const renderDetailMode = () => {
@@ -516,16 +651,9 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* 하단 액션 버튼들 */}
         <div className="border-t border-gray-100 p-4">
           <div className="flex space-x-3">
-            <BookmarkButton
-              itemId={selectedSpot.id}
-              itemType="spot"
+            <OptimizedBookmarkButton
+              spotId={selectedSpot.id}
               variant="default"
-              onStatusChange={(isBookmarked) => {
-                const message = isBookmarked 
-                  ? `${selectedSpot.name}이(가) 북마크에 추가되었습니다.`
-                  : `${selectedSpot.name}이(가) 북마크에서 제거되었습니다.`;
-                console.log(message);
-              }}
             />
             
             {selectedSpot.reservation_link && (
@@ -547,7 +675,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   // 리스트 모드 렌더링
   const renderListMode = () => {
-    const displayData = getDisplayData();
     const titleText = showLocalDeals ? '로컬딜 가게 목록' : `${activeCategory} 목록`;
 
     return (
@@ -562,10 +689,10 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
             {showLocalDeals && (
               <span className="text-green-600 font-medium">🎟️ 쿠폰 제공</span>
             )}
-            {loading && (
+            {(loading || bookmarkLoading) && (
               <div className="flex items-center space-x-1">
                 <div className="animate-spin w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <span>로딩중</span>
+                <span>{loading ? '로딩중' : '북마크 로딩중'}</span>
               </div>
             )}
           </div>
@@ -660,12 +787,11 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                     </div>
 
                     {/* 북마크 버튼 */}
-                      <BookmarkButton
-                        itemId={spot.id}
-                        itemType="spot"
-                        variant="icon-only"
-                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                      />
+                    <OptimizedBookmarkButton
+                      spotId={spot.id}
+                      variant="icon-only"
+                      className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    />
                   </div>
                 );
               })}
