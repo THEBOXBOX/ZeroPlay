@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
+import BookmarkButton from './BookmarkButton';
 
 // 로컬딜 데이터 타입
 interface LocalDeal {
@@ -235,8 +236,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   onSpotClick,
 }) => {
   // State
-  const [isSpotBookmarked, setIsSpotBookmarked] = useState(false);
-  const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   const userId = getUserId();
@@ -252,57 +251,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   const getLocalDealSpots = (): LocalSpot[] => {
     return spots.filter(spot => hasLocalDeal(spot.id));
-  };
-
-  // 북마크 상태 확인
-  useEffect(() => {
-    const checkBookmarkStatus = async () => {
-      if (!selectedSpot) {
-        setIsSpotBookmarked(false);
-        setCurrentImageIndex(0);
-        return;
-      }
-      
-      try {
-        const result = await isBookmarked(userId, selectedSpot.id, 'spot');
-        if (result.success) {
-          setIsSpotBookmarked(result.isBookmarked || false);
-        }
-        setCurrentImageIndex(0);
-      } catch (error) {
-        console.error('북마크 상태 확인 오류:', error);
-      }
-    };
-
-    checkBookmarkStatus();
-  }, [selectedSpot?.id, userId]);
-
-  // 북마크 토글 함수
-  const handleBookmarkToggle = async () => {
-    if (!selectedSpot) return;
-    
-    setBookmarkLoading(true);
-    
-    try {
-      const result = await toggleBookmark(userId, selectedSpot.id, 'spot');
-
-      if (result.success) {
-        setIsSpotBookmarked(result.isBookmarked || false);
-        
-        const message = result.isBookmarked ? 
-          `${selectedSpot.name}이(가) 북마크에 추가되었습니다.` : 
-          `${selectedSpot.name}이(가) 북마크에서 제거되었습니다.`;
-        
-        console.log(message);
-      } else {
-        alert(result.error || '북마크 처리 중 오류가 발생했습니다.');
-      }
-    } catch (error) {
-      console.error('북마크 토글 오류:', error);
-      alert('북마크 처리 중 오류가 발생했습니다.');
-    } finally {
-      setBookmarkLoading(false);
-    }
   };
 
   // 로컬딜 쿠폰 받기
@@ -398,26 +346,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   };
 
   // 북마크 버튼 컴포넌트
-  const BookmarkButton = () => (
-    <button 
-      onClick={handleBookmarkToggle}
-      disabled={bookmarkLoading}
-      className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-        isSpotBookmarked
-          ? 'bg-red-50 hover:bg-red-100 text-red-600 border border-red-200'
-          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-      } ${bookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-    >
-      <Heart 
-        className={`w-4 h-4 ${
-          isSpotBookmarked ? 'fill-red-500 text-red-500' : 'text-gray-500'
-        }`}
-      />
-      <span>
-        {bookmarkLoading ? '처리중...' : isSpotBookmarked ? '북마크됨' : '북마크'}
-      </span>
-    </button>
-  );
 
   // 상세정보 모드 렌더링
   const renderDetailMode = () => {
@@ -588,7 +516,17 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
         {/* 하단 액션 버튼들 */}
         <div className="border-t border-gray-100 p-4">
           <div className="flex space-x-3">
-            <BookmarkButton />
+            <BookmarkButton
+              itemId={selectedSpot.id}
+              itemType="spot"
+              variant="default"
+              onStatusChange={(isBookmarked) => {
+                const message = isBookmarked 
+                  ? `${selectedSpot.name}이(가) 북마크에 추가되었습니다.`
+                  : `${selectedSpot.name}이(가) 북마크에서 제거되었습니다.`;
+                console.log(message);
+              }}
+            />
             
             {selectedSpot.reservation_link && (
               <button 
@@ -722,15 +660,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                     </div>
 
                     {/* 북마크 버튼 */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        console.log('북마크 토글:', spot.name);
-                      }}
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                      <Bookmark className="w-5 h-5 text-gray-400" />
-                    </button>
+                      <BookmarkButton
+                        itemId={spot.id}
+                        itemType="spot"
+                        variant="icon-only"
+                        className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                      />
                   </div>
                 );
               })}
