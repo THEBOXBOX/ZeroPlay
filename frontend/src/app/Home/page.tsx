@@ -1,25 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Bell, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import Header from '../components/Header'; // 공통 헤더 import
+import BottomNavBar from '../components/NavBar'; // 공통 네비바 import
 import { BenefitsSection, AIRoutesSection, LocalDealsSection } from '../components';
 
 const HomePage = () => {
-  const Header = () => (
-    <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] bg-white px-4 py-3 flex items-center justify-between border-b border-gray-100 h-[60px] z-50">
-      <div className="flex items-center">
-        <div className="flex items-center bg-gray-100 px-2 py-1 rounded-lg">
-          <span className="text-black font-bold text-sm">my</span>
-          <span className="text-orange-500 font-bold text-sm">SUBWAY</span>
-          <span className="text-xs text-gray-500 ml-1">(임시로고)</span>
-        </div>
-      </div>
-      <div className="flex items-center space-x-3">
-        <Bell className="w-5 h-5 text-gray-600" />
-        <Settings className="w-5 h-5 text-gray-600" />
-      </div>
-    </div>
-  );
+  const [activeTab, setActiveTab] = useState('홈');
 
   const BannerSlider = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -128,8 +115,16 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <Header />
+      {/* 공통 헤더 컴포넌트 */}
+      <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
+        <Header 
+          title="mySUBWAY"
+          showSearch={false} // 홈에서는 검색 버튼 숨김
+          onNotificationClick={() => console.log('알림 클릭')}
+          onSettingsClick={() => console.log('설정 클릭')}
+          className="h-[60px] border-b border-gray-100"
+        />
+      </div>
 
       {/* Main Content */}
       <div 
@@ -174,31 +169,12 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] bg-white border-t border-gray-200 px-2 py-1 h-[60px] z-50">
-        <div className="flex justify-around items-center h-full">
-          <div className="flex flex-col items-center py-1 px-2 text-black">
-            <div className="w-6 h-6 mb-1">🏠</div>
-            <span className="text-xs font-medium">홈</span>
-            <div className="w-8 h-1 bg-black rounded-full mt-1"></div>
-          </div>
-          <div className="flex flex-col items-center py-1 px-2 text-gray-500">
-            <div className="w-6 h-6 mb-1">🤖</div>
-            <span className="text-xs">AI 루트</span>
-          </div>
-          <div className="flex flex-col items-center py-1 px-2 text-gray-500">
-            <div className="w-6 h-6 mb-1">🎁</div>
-            <span className="text-xs">혜택 정보</span>
-          </div>
-          <div className="flex flex-col items-center py-1 px-2 text-gray-500">
-            <div className="w-6 h-6 mb-1">🗺️</div>
-            <span className="text-xs">지도</span>
-          </div>
-          <div className="flex flex-col items-center py-1 px-2 text-gray-500">
-            <div className="w-6 h-6 mb-1">👤</div>
-            <span className="text-xs">내 정보</span>
-          </div>
-        </div>
+      {/* 공통 하단 네비게이션 */}
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
+        <BottomNavBar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
       </div>
     </div>
   );

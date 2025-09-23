@@ -1,5 +1,4 @@
-// 🔥 완료된 BottomSheet.tsx 파일 - 정렬 기능 추가
-// src/app/Map/components/BottomSheet.tsx - 기존 UI + 정렬 기능 추가
+// src/app/Map/components/BottomSheet.tsx - 정렬 기능 및 쿠폰 상태 관리 완료 버전
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -24,10 +23,10 @@ import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
 import BookmarkButton from './BookmarkButton';
 
-// 🔥 정렬 옵션 타입 추가
+// 정렬 옵션 타입
 type SortOption = 'recommended' | 'distance' | 'rating';
 
-// 🔥 정렬 드롭다운 컴포넌트 추가
+// 정렬 드롭다운 컴포넌트
 interface SortDropdownProps {
   currentSort: SortOption;
   onSortChange: (sort: SortOption) => void;
@@ -112,7 +111,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   );
 };
 
-// 🔥 거리 계산 함수 추가
+// 거리 계산 함수 (Haversine formula)
 const calculateDistance = (
   lat1: number, 
   lng1: number, 
@@ -130,7 +129,7 @@ const calculateDistance = (
   return R * c;
 };
 
-// 🔥 스팟 정렬 함수 추가
+// 스팟 정렬 함수
 const sortSpots = (
   spots: LocalSpot[], 
   sortBy: SortOption, 
@@ -187,7 +186,7 @@ const sortSpots = (
   }
 };
 
-// 🔥 거리 포맷 함수 추가
+// 거리 포맷 함수
 const formatDistance = (
   userLocation: { lat: number; lng: number } | null,
   spot: LocalSpot
@@ -224,7 +223,7 @@ interface LocalDeal {
   is_active: boolean;
 }
 
-// 🔥 실제 DB 연결된 로컬딜 데이터!
+// 실제 DB 연결된 로컬딜 데이터
 const DUMMY_LOCAL_DEALS = [
   // === 체험 (Experience) - 4개 ===
   {
@@ -426,13 +425,16 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   const [bookmarkStatuses, setBookmarkStatuses] = useState<Record<string, boolean>>({});
   const [bookmarkLoading, setBookmarkLoading] = useState(true);
   
-  // 🔥 정렬 관련 State 추가
+  // 정렬 관련 State
   const [sortBy, setSortBy] = useState<SortOption>('recommended');
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   
+  // 쿠폰 받기 상태 관리
+  const [receivedCoupons, setReceivedCoupons] = useState<Set<string>>(new Set());
+  
   const userId = getUserId();
 
-  // 🔥 로컬딜 관련 헬퍼 함수들 (먼저 정의)
+  // 로컬딜 관련 헬퍼 함수들
   const hasLocalDeal = (spotId: string): boolean => {
     return DUMMY_LOCAL_DEALS.some(deal => deal.spot_id === spotId && deal.is_active);
   };
@@ -441,7 +443,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     return DUMMY_LOCAL_DEALS.find(deal => deal.spot_id === spotId && deal.is_active);
   };
 
-  // 🔥 현재 위치 가져오기 추가
+  // 현재 위치 가져오기
   useEffect(() => {
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -481,12 +483,12 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     }
   }, [spots, showLocalDeals, activeCategory]);
 
-  // 🔥 정렬된 데이터 계산 추가
+  // 정렬된 데이터 계산
   const sortedDisplayData = useMemo((): LocalSpot[] => {
     return sortSpots(displayData, sortBy, userLocation);
   }, [displayData, sortBy, userLocation]);
 
-  // 북마크 상태 일괄 조회 (성능 최적화 - Promise.all 사용) - 🔥 sortedDisplayData 사용으로 변경
+  // 북마크 상태 일괄 조회
   useEffect(() => {
     const loadBookmarkStatuses = async () => {
       if (sortedDisplayData.length === 0) {
@@ -532,7 +534,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     };
 
     loadBookmarkStatuses();
-  }, [sortedDisplayData, userId]); // 🔥 displayData -> sortedDisplayData로 변경
+  }, [sortedDisplayData, userId]);
 
   // 북마크 토글 핸들러
   const handleBookmarkToggle = async (spotId: string, currentStatus: boolean) => {
@@ -573,7 +575,16 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
   // 로컬딜 쿠폰 받기
   const handleGetCoupon = (deal: LocalDeal) => {
+    // 이미 받은 쿠폰인지 확인
+    if (receivedCoupons.has(deal.id)) {
+      alert('이미 받은 쿠폰입니다! 🎟️');
+      return;
+    }
+
+    // 쿠폰 받기 처리
+    setReceivedCoupons(prev => new Set([...prev, deal.id]));
     alert(`${deal.title} 쿠폰을 받았습니다! 🎉`);
+    
     // 실제로는 쿠폰 저장 API 호출
     console.log('🎟️ 쿠폰 발급:', deal);
   };
@@ -790,12 +801,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                     {localDeal.valid_until}까지 유효
                   </p>
                 </div>
-                <button 
-                  onClick={() => handleGetCoupon(localDeal)}
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                >
-                  쿠폰 받기
-                </button>
+                
+                {/* 쿠폰 받기 버튼 상태 관리 */}
+                {receivedCoupons.has(localDeal.id) ? (
+                  <div className="bg-gray-400 text-white py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
+                    받기 완료
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => handleGetCoupon(localDeal)}
+                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    쿠폰 받기
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -885,20 +904,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     );
   };
 
-  // 리스트 모드 렌더링 - 🔥 정렬 드롭다운 추가
+  // 리스트 모드 렌더링
   const renderListMode = () => {
     const titleText = showLocalDeals ? '로컬딜 가게 목록' : `${activeCategory} 목록`;
 
     return (
       <div className="h-full flex flex-col">
-        {/* 헤더 - 🔥 정렬 드롭다운 추가 */}
+        {/* 헤더 */}
         <div className="px-4 pb-3 border-b border-gray-100">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold text-gray-900">
               {titleText}
             </h3>
             
-            {/* 🔥 정렬 드롭다운 추가 */}
+            {/* 정렬 드롭다운 */}
             <div className="mt-1">
               <SortDropdown 
                 currentSort={sortBy}
@@ -922,7 +941,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
           </div>
         </div>
 
-        {/* 스팟 리스트 - 🔥 sortedDisplayData 사용 및 거리 정보 추가 */}
+        {/* 스팟 리스트 */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
           {sortedDisplayData.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-32 text-gray-500">
@@ -936,7 +955,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
               {sortedDisplayData.map((spot: LocalSpot, index) => {
                 const businessStatus = getBusinessStatus(spot);
                 const spotDeal = getLocalDealForSpot(spot.id);
-                // 🔥 거리 정보 추가
                 const distance = userLocation ? formatDistance(userLocation, spot) : '';
                 
                 return (
@@ -949,7 +967,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                       }
                     }}
                   >
-                    {/* 🔥 순위 표시 (거리순일 때만) */}
+                    {/* 순위 표시 (거리순일 때만) */}
                     {sortBy === 'distance' && userLocation && (
                       <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-1">
                         {index + 1}
@@ -977,7 +995,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                             {spotDeal.deal_value}
                           </span>
                         )}
-                        {/* 🔥 거리 정보 추가 (거리순일 때만) */}
+                        {/* 거리 정보 (거리순일 때만) */}
                         {sortBy === 'distance' && distance && (
                           <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded">
                             📍 {distance}
