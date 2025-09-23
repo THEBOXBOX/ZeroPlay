@@ -6,7 +6,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'My SUBWAY',
+  title: 'ZeroPlay',
   description: '지도 기반 로컬 체험 서비스',
 }
 
