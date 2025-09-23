@@ -25,7 +25,7 @@ app.use(cors({
     ? process.env.FRONTEND_URL?.split(',') || []
     : ['http://localhost:3000', 'http://127.0.0.1:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-user-id'],
   credentials: true
 }));
 app.use(morgan('combined'));

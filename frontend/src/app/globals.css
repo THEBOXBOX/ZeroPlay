@@ -21,7 +21,8 @@ body {
 /* 모바일 컨테이너 추가 */
 .mobile-container {
   width: 393px !important;
-  height: 852px !important;
+  max-height: 852px !important; 
+  height: 100vh !important;
   margin: 0 auto;
   position: relative;
   overflow-y: auto; /* hidden에서 auto로 변경 */
