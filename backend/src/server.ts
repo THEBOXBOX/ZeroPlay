@@ -10,6 +10,7 @@ import benefitRoutes from './routes/benefit';
 import testRoutes from './routes/test';
 import photoRouter from './routes/photo';
 import aiRoutes from './routes/ai';
+import bookmarkRoutes from './routes/bookmark';
 
 // Supabase 연결 테스트
 import { testSupabaseConnection } from './config/supabase';
@@ -39,6 +40,7 @@ app.use('/api/benefits', benefitRoutes);  // 복수형으로 통일
 app.use('/api/test', testRoutes);
 app.use('/api', photoRouter);
 app.use('/api/ai', aiRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
 
 // Health check (강화된 버전)
 app.get('/api/health', async (req, res) => {
