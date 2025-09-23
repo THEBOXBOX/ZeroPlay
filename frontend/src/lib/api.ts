@@ -1,7 +1,4 @@
-// ============================================================================
-// 완전한 API 클라이언트 - 북마크 메서드 포함
-// 파일: frontend/src/lib/api.ts (기존 파일 수정)
-// ============================================================================
+// frontend/src/lib/api.ts (업데이트된 버전)
 
 const API_BASE_URL = process.env.NODE_ENV === 'development' 
   ? 'http://localhost:3001/api' 
@@ -12,7 +9,7 @@ export class ApiClient {
     endpoint: string, 
     options: RequestInit = {}
   ): Promise<T> {
-    console.log(`API 호출: ${API_BASE_URL}${endpoint}`); // 디버깅용
+    console.log(`API 호출: ${API_BASE_URL}${endpoint}`);
 
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -23,7 +20,7 @@ export class ApiClient {
         ...options,
       });
 
-      console.log(`응답 상태: ${response.status}`); // 디버깅용
+      console.log(`응답 상태: ${response.status}`);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -32,7 +29,7 @@ export class ApiClient {
       }
 
       const data = await response.json();
-      console.log('응답 데이터:', data); // 디버깅용
+      console.log('응답 데이터:', data);
       return data;
     } catch (error) {
       console.error('API 호출 실패:', error);
@@ -73,16 +70,8 @@ export class ApiClient {
     return this.request(`/ai/search-places?${params.toString()}`);
   }
 
-  // 코스 평가 API
-  static async rateRoute(routeId: string, rating: number, feedback?: string, sessionId?: string) {
-    return this.request('/ai/rate-route', {
-      method: 'POST',
-      body: JSON.stringify({ routeId, rating, feedback, sessionId }),
-    });
-  }
-
   // ============================================================================
-  // 북마크 관련 API (✅ 누락된 메서드들 추가)
+  // 북마크 관련 API
   // ============================================================================
 
   // AI 루트 북마크 저장
@@ -93,12 +82,12 @@ export class ApiClient {
     });
   }
 
-  // AI 루트 북마크 목록 조회 (✅ 추가)
+  // AI 루트 북마크 목록 조회
   static async getAIBookmarks(sessionId: string) {
     return this.request(`/bookmarks/ai-routes/${sessionId}`);
   }
 
-  // AI 루트 북마크 삭제 (✅ 추가)
+  // AI 루트 북마크 삭제
   static async deleteAIBookmark(bookmarkId: string, sessionId: string) {
     return this.request(`/bookmarks/ai-route/${bookmarkId}`, {
       method: 'DELETE',
@@ -111,8 +100,15 @@ export class ApiClient {
     return this.request(`/bookmarks/summary/${sessionId}`);
   }
 
+  // 모든 북마크 삭제 (✅ 추가된 메서드)
+  static async deleteAllBookmarks(sessionId: string) {
+    return this.request(`/bookmarks/all/${sessionId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // ============================================================================
-  // 청년혜택 북마크 관련 API (팀원 구현 후 사용)
+  // 청년혜택 북마크 관련 API (팀원 구현 후 활성화)
   // ============================================================================
 
   // 청년혜택 북마크 저장
@@ -137,7 +133,7 @@ export class ApiClient {
   }
 
   // ============================================================================
-  // 지도 북마크 관련 API (팀원 구현 후 사용)
+  // 지도 북마크 관련 API (팀원 구현 후 활성화)
   // ============================================================================
 
   // 지도 장소 북마크 저장
@@ -162,7 +158,7 @@ export class ApiClient {
   }
 
   // ============================================================================
-  // 기존 여행 관련 API (그대로 유지)
+  // 기존 여행 관련 API
   // ============================================================================
 
   // 여행 추천 API
@@ -192,7 +188,7 @@ export class ApiClient {
     return this.request('/health');
   }
 
-  // 에러 리포팅 (선택사항)
+  // 에러 리포팅
   static async reportError(error: any, context?: string) {
     return this.request('/error-report', {
       method: 'POST',
@@ -203,7 +199,6 @@ export class ApiClient {
         userAgent: navigator.userAgent
       }),
     }).catch(() => {
-      // 에러 리포팅 실패해도 무시
       console.warn('에러 리포팅 실패');
     });
   }

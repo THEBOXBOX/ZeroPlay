@@ -1,6 +1,9 @@
+// frontend/src/app/AI-route/components/RouteResults.tsx (TypeScript 에러 수정)
 'use client';
 
 import { useState } from 'react';
+import { SessionManager } from '@/lib/session';
+import { ApiClient } from '@/lib/api';
 
 interface Place {
   id: string;
@@ -25,18 +28,23 @@ interface RouteResultsProps {
   routes: RouteRecommendation[];
   onSaveRoute?: (route: RouteRecommendation) => void;
   onShareRoute?: (route: RouteRecommendation) => void;
-  onBookmarkRoute?: (route: RouteRecommendation) => void; // ✅ 북마크 기능 추가
+}
+
+// ✅ API 응답 타입 정의
+interface ApiResponse {
+  success: boolean;
+  data?: any;
+  message?: string;
 }
 
 export default function RouteResults({ 
   routes, 
   onSaveRoute, 
-  onShareRoute,
-  onBookmarkRoute 
+  onShareRoute
 }: RouteResultsProps) {
-  const [savedRoutes, setSavedRoutes] = useState<string[]>([]);
-  const [bookmarkedRoutes, setBookmarkedRoutes] = useState<string[]>([]); // ✅ 북마크 상태
-  const [expandedRoutes, setExpandedRoutes] = useState<string[]>([]); // ✅ 기본적으로 모든 카드 닫힘
+  const [bookmarkedRoutes, setBookmarkedRoutes] = useState<string[]>([]);
+  const [expandedRoutes, setExpandedRoutes] = useState<string[]>([]);
+  const [bookmarkLoading, setBookmarkLoading] = useState<string[]>([]);
 
   const toggleRouteExpansion = (routeId: string) => {
     setExpandedRoutes(prev => 
@@ -46,15 +54,62 @@ export default function RouteResults({
     );
   };
 
-  // ✅ 북마크 토글 함수
-  const toggleBookmark = (route: RouteRecommendation) => {
+  // ✅ 실제 백엔드 API를 통한 북마크 저장/삭제 (타입 수정)
+  const toggleBookmark = async (route: RouteRecommendation) => {
     const isBookmarked = bookmarkedRoutes.includes(route.id);
     
-    if (isBookmarked) {
-      setBookmarkedRoutes(prev => prev.filter(id => id !== route.id));
-    } else {
-      setBookmarkedRoutes(prev => [...prev, route.id]);
-      onBookmarkRoute?.(route);
+    setBookmarkLoading(prev => [...prev, route.id]);
+
+    try {
+      const sessionId = SessionManager.getSessionId();
+
+      if (isBookmarked) {
+        // 북마크 삭제
+        const response = await ApiClient.deleteAIBookmark(route.id, sessionId) as ApiResponse;
+        
+        if (response.success) {
+          setBookmarkedRoutes(prev => prev.filter(id => id !== route.id));
+          showToast('북마크에서 제거되었습니다', 'success');
+        } else {
+          throw new Error(response.message || '삭제 실패');
+        }
+        
+      } else {
+        // 북마크 저장
+        const response = await ApiClient.saveAIRouteBookmark(sessionId, route) as ApiResponse;
+        
+        if (response.success) {
+          setBookmarkedRoutes(prev => [...prev, route.id]);
+          showToast('북마크에 저장되었습니다! 마이페이지에서 확인하세요', 'success');
+          onSaveRoute?.(route);
+        } else {
+          throw new Error(response.message || '저장 실패');
+        }
+      }
+
+    } catch (error: any) {
+      console.error('북마크 처리 실패:', error);
+      
+      // ✅ 에러 타입 체크 개선
+      if (error?.status === 409 || error?.message?.includes('409')) {
+        showToast('이미 저장된 코스입니다', 'warning');
+      } else if (error?.status === 500 || error?.message?.includes('500')) {
+        showToast('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요', 'error');
+      } else {
+        showToast(error?.message || '북마크 처리 중 오류가 발생했습니다', 'error');
+      }
+    } finally {
+      setBookmarkLoading(prev => prev.filter(id => id !== route.id));
+    }
+  };
+
+  // ✅ 간단한 토스트 메시지 표시 함수
+  const showToast = (message: string, type: 'success' | 'error' | 'warning') => {
+    const emoji = type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️';
+    
+    // 실제 프로젝트에서는 react-hot-toast 등을 사용하는 것이 좋습니다
+    if (typeof window !== 'undefined') {
+      alert(`${emoji} ${message}`);
     }
   };
 
@@ -104,7 +159,6 @@ export default function RouteResults({
     }
   };
 
-  // ✅ 실제 예산 계산 함수 (정확한 계산)
   const calculateTotalBudget = (places: Place[]) => {
     return places.reduce((total, place) => total + place.cost, 0);
   };
@@ -113,14 +167,14 @@ export default function RouteResults({
     <div className="space-y-4">
       {routes.map((route, routeIndex) => {
         const isExpanded = expandedRoutes.includes(route.id);
-        const isSaved = savedRoutes.includes(route.id);
         const isBookmarked = bookmarkedRoutes.includes(route.id);
-        const actualTotalBudget = calculateTotalBudget(route.places); // ✅ 실제 예산 계산
+        const isBookmarkLoading = bookmarkLoading.includes(route.id);
+        const actualTotalBudget = calculateTotalBudget(route.places);
 
         return (
           <div key={route.id} className="bg-white rounded-2xl shadow-md border overflow-hidden hover:shadow-lg transition-shadow">
             
-            {/* ✅ 개선된 카드 헤더 - 닫힌 상태에서도 충분한 정보 제공 */}
+            {/* 카드 헤더 */}
             <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
@@ -134,7 +188,6 @@ export default function RouteResults({
                   </div>
                   <h2 className="text-lg font-bold mb-1 leading-tight">{route.title}</h2>
                   
-                  {/* ✅ 닫힌 상태에서도 보이는 요약 정보 */}
                   <div className="flex items-center gap-3 text-sm opacity-90">
                     <span>⏱️ {route.duration}</span>
                     <span>📍 {route.places.length}곳</span>
@@ -142,17 +195,22 @@ export default function RouteResults({
                   </div>
                 </div>
                 
-                {/* ✅ 액션 버튼들 */}
+                {/* 액션 버튼들 */}
                 <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={() => toggleBookmark(route)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all text-sm ${
+                    disabled={isBookmarkLoading}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all text-sm relative ${
                       isBookmarked 
                         ? 'bg-red-500 text-white shadow-md' 
                         : 'bg-white/20 text-white hover:bg-white/30'
-                    }`}
+                    } ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {isBookmarked ? '❤️' : '🤍'}
+                    {isBookmarkLoading ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      isBookmarked ? '❤️' : '🤍'
+                    )}
                   </button>
                   <button
                     onClick={() => onShareRoute?.(route)}
@@ -164,7 +222,7 @@ export default function RouteResults({
               </div>
             </div>
 
-            {/* ✅ 하이라이트 태그 - 항상 표시 */}
+            {/* 하이라이트 태그 */}
             <div className="bg-blue-50 p-3">
               <div className="flex flex-wrap gap-1">
                 {route.highlights.slice(0, 5).map((highlight, index) => (
@@ -183,7 +241,7 @@ export default function RouteResults({
               </div>
             </div>
 
-            {/* ✅ 간단한 장소 미리보기 - 항상 표시 */}
+            {/* 장소 미리보기 */}
             <div className="p-4 bg-gray-50">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-gray-800 flex items-center">
@@ -229,7 +287,7 @@ export default function RouteResults({
               )}
             </div>
 
-            {/* ✅ 펼치기/접기 버튼 */}
+            {/* 펼치기/접기 버튼 */}
             <div className="border-t bg-white">
               <button
                 onClick={() => toggleRouteExpansion(route.id)}
@@ -244,7 +302,7 @@ export default function RouteResults({
               </button>
             </div>
 
-            {/* ✅ 상세 정보 - 펼쳤을 때만 표시 */}
+            {/* 상세 정보 */}
             {isExpanded && (
               <div className="border-t bg-white">
                 <div className="p-4">
@@ -316,15 +374,16 @@ export default function RouteResults({
               </div>
             )}
 
-            {/* ✅ 하단 액션 영역 - 수정/일정표 버튼 제거, 핵심 기능만 유지 */}
+            {/* 하단 액션 영역 */}
             <div className="bg-white border-t p-4">
               <div className="space-y-3">
                 {/* 메인 액션 버튼 */}
                 <button 
                   className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-xl hover:shadow-lg transition-all font-bold text-sm shadow-md"
                   onClick={() => {
-                    // TODO: 실제 예약/선택 로직 구현
-                    alert('이 코스를 선택하셨습니다!');
+                    if (typeof window !== 'undefined') {
+                      alert('이 코스를 선택하셨습니다!');
+                    }
                   }}
                 >
                   이 코스 선택하기 ✈️
@@ -334,13 +393,21 @@ export default function RouteResults({
                 <div className="grid grid-cols-2 gap-3">
                   <button 
                     onClick={() => toggleBookmark(route)}
-                    className={`py-2 px-3 rounded-xl transition-colors font-medium text-sm border-2 ${
+                    disabled={isBookmarkLoading}
+                    className={`py-2 px-3 rounded-xl transition-colors font-medium text-sm border-2 relative ${
                       isBookmarked
                         ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
                         : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                    }`}
+                    } ${isBookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {isBookmarked ? '❤️ 저장됨' : '🤍 저장하기'}
+                    {isBookmarkLoading ? (
+                      <span className="flex items-center justify-center">
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+                        처리중...
+                      </span>
+                    ) : (
+                      isBookmarked ? '❤️ 저장됨' : '🤍 저장하기'
+                    )}
                   </button>
                   <button 
                     onClick={() => onShareRoute?.(route)}

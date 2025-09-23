@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { SavedRoutesManager } from '../lib/savedRoutes';
+import { SavedRoutesManager } from '@/lib/savedRoutes';
 
 interface LikeButtonProps {
   route: {
