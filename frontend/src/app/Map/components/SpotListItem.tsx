@@ -1,4 +1,3 @@
-// frontend/src/app/Map/components/SpotListItem.tsx
 'use client';
 
 import React from 'react';

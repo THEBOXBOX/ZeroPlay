@@ -1,22 +1,11 @@
-// src/app/Map/components/BottomSheet.tsx - 정렬 기능 및 쿠폰 상태 관리 완료 버전
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Heart, 
-  MapPin, 
-  Phone, 
-  Clock, 
-  Star, 
-  ExternalLink,
-  Ticket,
-  ChevronDown 
-} from 'lucide-react';
+import { Heart, MapPin, ChevronDown } from 'lucide-react';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
 import SpotListItem from './SpotListItem';
+import SpotDetailView from './SpotDetailView';
 
 // 정렬 옵션 타입
 type SortOption = 'recommended' | 'distance' | 'rating';
@@ -568,6 +557,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     }
   };
 
+
   // 로컬딜 쿠폰 받기
   const handleGetCoupon = (deal: LocalDeal) => {
     // 이미 받은 쿠폰인지 확인
@@ -616,9 +606,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
   const handleTouchEnd = (e: React.TouchEvent) => {
     e.preventDefault();
   };
-
-  // 유틸리티 함수들
-  const isDetailMode = !!selectedSpot;
 
   const getCategoryIcon = (category: LocalSpot['category']) => {
     const icons = {
@@ -700,205 +687,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     );
   };
 
-  // 상세정보 모드 렌더링
-  const renderDetailMode = () => {
-    if (!selectedSpot) return null;
-    
-    const businessStatus = getBusinessStatus(selectedSpot);
-    const hasMultipleImages = selectedSpot.images && selectedSpot.images.length > 1;
-    const localDeal = getLocalDealForSpot(selectedSpot.id);
-
-    return (
-      <div className="h-full flex flex-col">
-        {/* 헤더 */}
-        <div className="flex items-center p-4 border-b border-gray-100">
-          <button 
-            onClick={onBackToList}
-            className="mr-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </button>
-          <h3 className="text-lg font-semibold text-gray-900 flex-1">
-            {selectedSpot.name}
-          </h3>
-          <span className={`text-sm font-medium ${businessStatus.color}`}>
-            {businessStatus.status}
-          </span>
-        </div>
-
-        {/* 스크롤 가능한 내용 */}
-        <div className="flex-1 overflow-y-auto">
-
-          {/* 이미지 섹션 */}
-          {selectedSpot.images && selectedSpot.images.length > 0 && (
-            <div className="relative">
-              <div className="aspect-video bg-gray-200 overflow-hidden">
-                <img 
-                  src={selectedSpot.images[currentImageIndex]} 
-                  alt={selectedSpot.name}
-                  className="w-full h-full object-cover"
-                />
-                
-                {hasMultipleImages && (
-                  <>
-                    <button 
-                      onClick={goToPrevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition-colors"
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-                    <button 
-                      onClick={goToNextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 transition-colors"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
-                    
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
-                      {selectedSpot.images.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentImageIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            index === currentImageIndex ? 'bg-white' : 'bg-white/50'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* 로컬딜 섹션 */}
-          {localDeal && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3 m-4 mb-2">
-              <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center space-x-2">
-                <Ticket className="w-4 h-4 text-green-600" />
-                <span className="font-bold text-green-700 text-sm">로컬딜 쿠폰</span>
-                <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                  {localDeal.remaining_count}개 남음
-                </span>
-              </div>
-              <span className="text-lg font-bold text-green-600">
-                {localDeal.deal_value}
-              </span>
-            </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold text-gray-800 text-sm mb-1">
-                    {localDeal.title}
-                  </h4>
-                  <p className="text-xs text-gray-500">
-                    {localDeal.valid_until}까지 유효
-                  </p>
-                </div>
-                
-                {/* 쿠폰 받기 버튼 상태 관리 */}
-                {receivedCoupons.has(localDeal.id) ? (
-                  <div className="bg-gray-400 text-white py-2 px-4 rounded-lg text-sm font-medium cursor-not-allowed">
-                    받기 완료
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => handleGetCoupon(localDeal)}
-                    className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    쿠폰 받기
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-          
-          {/* 기본 정보 */}
-          <div className="p-4 space-y-4">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-lg">{getCategoryIcon(selectedSpot.category)}</span>
-                  <span className="text-sm text-blue-600 font-medium">
-                    {getCategoryName(selectedSpot.category)}
-                  </span>
-                  {selectedSpot.rating && selectedSpot.rating > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">
-                        {selectedSpot.rating} ({selectedSpot.review_count || 0})
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                {selectedSpot.description && (
-                  <p className="text-gray-600 text-sm leading-relaxed">
-                    {selectedSpot.description}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* 상세 정보 */}
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                <span className="text-gray-700 text-sm">{selectedSpot.address}</span>
-              </div>
-              
-              {selectedSpot.operating_hours && (
-                <div className="flex items-start space-x-3">
-                  <Clock className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700 text-sm">
-                    {typeof selectedSpot.operating_hours === 'string' 
-                      ? selectedSpot.operating_hours 
-                      : '운영시간 정보'}
-                  </span>
-                </div>
-              )}
-              
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                <button 
-                  onClick={() => {
-                    window.location.href = `tel:02-1234-5678`;
-                  }}
-                  className="text-blue-600 hover:text-blue-800 text-sm"
-                >
-                  02-1234-5678
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 하단 액션 버튼들 */}
-        <div className="border-t border-gray-100 p-4">
-          <div className="flex space-x-3">
-            <OptimizedBookmarkButton
-              spotId={selectedSpot.id}
-              variant="default"
-            />
-            
-            {selectedSpot.reservation_link && (
-              <button 
-                onClick={() => {
-                  window.open(selectedSpot.reservation_link, '_blank');
-                }}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>예약하기</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   // 리스트 모드 렌더링
   const renderListMode = () => {
     const titleText = showLocalDeals ? '로컬딜 가게 목록' : `${activeCategory} 목록`;
@@ -976,6 +764,8 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     );
   };
 
+
+
   if (!showBottomSheet) return null;
 
   const DRAG_HANDLE_HEIGHT = 12;
@@ -1010,10 +800,26 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
 
       {/* 콘텐츠 */}
       <div 
-        className="overflow-hidden"
-        style={{ height: `${contentHeight}px` }}
-      >
-        {isDetailMode ? renderDetailMode() : renderListMode()}
+          className="overflow-hidden"
+          style={{ height: `${contentHeight}px` }}
+        >
+          {selectedSpot ? (
+            <SpotDetailView
+              spot={selectedSpot}
+              currentImageIndex={currentImageIndex}
+              onPrevImage={goToPrevImage}
+              onNextImage={goToNextImage}
+              onBackToList={onBackToList}
+              bookmarkStatuses={bookmarkStatuses}
+              bookmarkLoading={bookmarkLoading}
+              onBookmarkToggle={handleBookmarkToggle}
+              localDeals={DUMMY_LOCAL_DEALS}
+              receivedCoupons={receivedCoupons}
+              onReceiveCoupon={handleGetCoupon}
+            />
+          ) : (
+            renderListMode()
+          )}
       </div>
     </div>
   );
