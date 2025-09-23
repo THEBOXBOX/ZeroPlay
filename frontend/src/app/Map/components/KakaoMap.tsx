@@ -1,4 +1,3 @@
-// src/app/Map/components/KakaoMap.tsx - 로컬딜 마커 스타일 추가
 'use client';
 
 import { useEffect, useRef } from 'react';

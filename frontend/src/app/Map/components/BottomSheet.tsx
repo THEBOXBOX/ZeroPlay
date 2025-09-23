@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
+import SpotListItem from './SpotListItem';
 
 // 정렬 옵션 타입
 type SortOption = 'recommended' | 'distance' | 'rating';
@@ -952,98 +953,20 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                 const distance = userLocation ? formatDistance(userLocation, spot) : '';
                 
                 return (
-                  <div 
-                    key={spot.id} 
-                    className="flex items-center space-x-3 p-4 border-b border-gray-50 hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => {
-                      if (onSpotClick) {
-                        onSpotClick(spot);
-                      }
-                    }}
-                  >
-                    {/* 순위 표시 (거리순일 때만) */}
-                    {sortBy === 'distance' && userLocation && (
-                      <div className="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-1">
-                        {index + 1}
-                      </div>
-                    )}
-
-                    {/* 스팟 아이콘 */}
-                    <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0 relative">
-                      {getCategoryIcon(spot.category)}
-                      {spotDeal && (
-                        <div className="absolute -top-1 -right-1 bg-green-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                          🎟️
-                        </div>
-                      )}
-                    </div>
-
-                    {/* 스팟 정보 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="text-xs text-gray-500 px-2 py-1 bg-gray-100 rounded-full">
-                          {getCategoryName(spot.category)}
-                        </span>
-                        {spotDeal && (
-                          <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full font-medium">
-                            {spotDeal.deal_value}
-                          </span>
-                        )}
-                        {/* 거리 정보 (거리순일 때만) */}
-                        {sortBy === 'distance' && distance && (
-                          <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded">
-                            📍 {distance}
-                          </span>
-                        )}
-                      </div>
-                      
-                      <h3 className="font-semibold text-gray-900 mb-1 truncate text-base">
-                        {spot.name}
-                      </h3>
-                      
-                      <p className="text-sm text-gray-600 mb-2 truncate">
-                        {spot.address}
-                      </p>
-                      
-                      <div className="flex items-center space-x-3 mb-2">
-                        <span className={`text-sm font-medium ${businessStatus.color}`}>
-                          {businessStatus.status}
-                        </span>
-                        {spot.price_range && (
-                          <span className="text-sm text-blue-600 font-medium">
-                            {spot.price_range}
-                          </span>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-1">
-                          {spot.rating ? (
-                            <>
-                              <Star className="w-3 h-3 text-yellow-500 fill-current" />
-                              <span className="text-sm text-gray-600">
-                                {spot.rating.toFixed(1)}
-                              </span>
-                              {spot.review_count && (
-                                <span className="text-sm text-gray-400">
-                                  ({spot.review_count})
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            <span className="text-sm text-gray-400">평점 없음</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 북마크 버튼 */}
-                    <OptimizedBookmarkButton
-                      spotId={spot.id}
-                      variant="icon-only"
-                      className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    />
-                  </div>
+                  <SpotListItem
+                    key={spot.id}
+                    spot={spot}
+                    index={index}
+                    sortBy={sortBy}
+                    userLocation={userLocation}
+                    spotDeal={spotDeal}
+                    distance={distance}
+                    businessStatus={businessStatus}
+                    bookmarkStatuses={bookmarkStatuses}
+                    bookmarkLoading={bookmarkLoading}
+                    onSpotClick={onSpotClick}
+                    onBookmarkToggle={handleBookmarkToggle}
+                  />
                 );
               })}
             </div>
