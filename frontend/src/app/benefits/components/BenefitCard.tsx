@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react';
-import { ExternalLink } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Bookmark } from 'lucide-react';
 
 interface BenefitProgram {
   id: number;
@@ -21,93 +21,209 @@ interface BenefitProgram {
 
 interface BenefitCardProps {
   program: BenefitProgram;
-  onClick?: (program: BenefitProgram) => void;
+  isBookmarked?: boolean;
+  onBookmarkToggle?: (id: number, newState: boolean) => void;
 }
 
-const BenefitCard: React.FC<BenefitCardProps> = ({ program, onClick }) => {
+const BenefitCard: React.FC<BenefitCardProps> = ({ 
+  program, 
+  isBookmarked: propIsBookmarked,
+  onBookmarkToggle 
+}) => {
   const router = useRouter();
+  const [isBookmarked, setIsBookmarked] = useState(propIsBookmarked || false);
+
+  // 컴포넌트 마운트 시 북마크 상태 확인
+  useEffect(() => {
+    if (propIsBookmarked === undefined) {
+      checkBookmarkStatus();
+    } else {
+      setIsBookmarked(propIsBookmarked);
+    }
+  }, [propIsBookmarked]);
+
+  const checkBookmarkStatus = async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/api/benefits/bookmarks/check/${program.id}`, {
+        headers: {
+          'x-user-id': 'anonymous'
+        }
+      });
+      const result = await response.json();
+      
+      if (result.success) {
+        setIsBookmarked(result.isBookmarked);
+      }
+    } catch (error) {
+      console.error('북마크 상태 확인 실패:', error);
+    }
+  };
+
+  const handleBookmarkToggle = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 방지
+    
+    try {
+      if (!isBookmarked) {
+        // 북마크 추가
+        const response = await fetch('http://localhost:3001/api/benefits/bookmarks', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': 'anonymous'
+          },
+          body: JSON.stringify({ benefit_id: program.id })
+        });
+        
+        if (response.ok) {
+          setIsBookmarked(true);
+          onBookmarkToggle?.(program.id, true);
+        }
+      } else {
+        // 북마크 삭제
+        const response = await fetch(`http://localhost:3001/api/benefits/bookmarks/${program.id}`, {
+          method: 'DELETE',
+          headers: {
+            'x-user-id': 'anonymous'
+          }
+        });
+        
+        if (response.ok) {
+          setIsBookmarked(false);
+          onBookmarkToggle?.(program.id, false);
+        }
+      }
+    } catch (error) {
+      console.error('북마크 처리 중 오류:', error);
+    }
+  };
 
   const handleCardClick = () => {
-    // 세부페이지로 이동
+    console.log('카드 클릭:', program.id);
     router.push(`/benefits/${program.id}`);
-    
-    // 기존 onClick도 호출 (필요한 경우)
-    if (onClick) {
-      onClick(program);
-    }
   };
 
   const getAmountColor = (amountType: string) => {
-    switch(amountType) {
-      case '지원금': return 'text-red-500';
-      case '할인': return 'text-red-500';
-      case '쿠폰': return 'text-red-500';
-      default: return 'text-green-500';
+    if (amountType === '무료' || amountType === 'free') {
+      return 'text-green-500';
     }
+    return 'text-red-500';
   };
 
   const getTagColor = (tag: string) => {
-    if (tag === '신규') return 'bg-green-100 text-green-700';
-    if (tag === '인기') return 'bg-blue-100 text-blue-700';
-    if (tag === '여행필수') return 'bg-purple-100 text-purple-700';
-    if (tag === '지역') return 'bg-orange-100 text-orange-700';
-    if (tag === '자연') return 'bg-green-100 text-green-700';
-    if (tag === '힐링') return 'bg-blue-100 text-blue-700';
-    if (tag === '교통') return 'bg-indigo-100 text-indigo-700';
-    if (tag === '숙박') return 'bg-pink-100 text-pink-700';
-    if (tag === '지역특화') return 'bg-yellow-100 text-yellow-700';
-    return 'bg-gray-100 text-gray-600';
+    const tagColors: {[key: string]: string} = {
+      '신규': 'bg-green-100 text-green-700',
+      '인기': 'bg-blue-100 text-blue-700',
+      '여행필수': 'bg-purple-100 text-purple-700',
+      '지역': 'bg-orange-100 text-orange-700',
+      '자연': 'bg-green-100 text-green-700',
+      '힐링': 'bg-blue-100 text-blue-700',
+      '교통': 'bg-indigo-100 text-indigo-700',
+      '숙박': 'bg-pink-100 text-pink-700',
+      '지역특화': 'bg-yellow-100 text-yellow-700',
+      '무료': 'bg-emerald-100 text-emerald-700',
+      '현금지원': 'bg-red-100 text-red-700',
+      '문화': 'bg-purple-100 text-purple-700',
+      '정부지원': 'bg-blue-100 text-blue-700',
+      '바우처': 'bg-orange-100 text-orange-700',
+      '여행': 'bg-blue-100 text-blue-700'
+    };
+    return tagColors[tag] || 'bg-gray-100 text-gray-600';
+  };
+
+  // 지역 영어 → 한글 변환
+  const getRegionKorean = (region: string) => {
+    const regionMap: {[key: string]: string} = {
+      'seoul': '서울',
+      'capital_area': '수도권',
+      'gangwon': '강원',
+      'chungcheong': '충청',
+      'jeolla': '전라',
+      'gyeongsang': '경상',
+      'jeju': '제주',
+      'national': '전국'
+    };
+    return regionMap[region] || region;
   };
 
   return (
     <div 
       onClick={handleCardClick}
-      className="relative bg-white rounded-2xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-md transition-all cursor-pointer"
+      className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-400 hover:shadow-lg transition-all cursor-pointer"
     >
-      {/* Top white section */}
-      <div className="bg-white p-5 pb-3">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-gray-900 mb-1">{program.title}</h3>
-            <p className="text-sm text-gray-600">{program.organization}</p>
+      <div className="p-5 pb-3">
+        <div className="flex items-start justify-between mb-3 mt-1">
+          <div className="flex-1 min-w-0 pr-3">
+            <h3 className="text-base font-bold text-gray-900 mb-1 leading-tight line-clamp-2">
+              {program.title}
+            </h3>
+            <p className="text-sm text-gray-600 whitespace-nowrap">{program.organization}</p>
           </div>
-          <div className="text-right">
-            <div className={`text-xl font-bold ${getAmountColor(program.amountType)}`}>
+          <div className="text-right flex-shrink-0 flex flex-col justify-center">
+            <div className={`text-sm font-bold ${getAmountColor(program.amountType)} leading-tight`}>
               {program.amount}
             </div>
-            <div className="text-sm text-gray-500">{program.amountType}</div>
+            <div className="text-xs text-gray-500 mt-1">{program.amountType}</div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {program.tags.map((tag, tagIndex) => (
-            <span
-              key={tagIndex}
-              className={`px-3 py-1 rounded-full text-xs font-medium ${getTagColor(tag)}`}
-            >
-              {tag}
-            </span>
-          ))}
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex flex-wrap gap-2">
+            {program.tags?.slice(0, 2).map((tag, tagIndex) => (
+              <span
+                key={tagIndex}
+                className={`px-3 py-1 rounded-full text-xs font-medium ${getTagColor(tag)}`}
+              >
+                {tag}
+              </span>
+            ))}
+            {program.tags?.length > 2 && (
+              <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                +{program.tags.length - 2}
+              </span>
+            )}
+          </div>
+          
+          {/* 북마크 버튼 */}
+          <button
+            onClick={handleBookmarkToggle}
+            className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
+              isBookmarked 
+                ? 'bg-red-100 hover:bg-red-200' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            }`}
+          >
+            <Bookmark 
+              className={`w-3 h-3 ${
+                isBookmarked 
+                  ? 'text-red-500 fill-red-500' 
+                  : 'text-gray-400'
+              }`}
+            />
+          </button>
         </div>
       </div>
 
-      {/* Bottom gray section */}
-      <div className="bg-gray-50 px-5 py-3 border-t border-gray-200">
+      <div className="bg-gray-50 px-5 py-3 border-t border-gray-100">
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">신청기간</span>
-            <span className="text-gray-700">{program.period}</span>
+            <span className="text-gray-700 font-medium">
+              {program.period || '상시'}
+            </span>
           </div>
+          
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">대상</span>
-            <span className="text-gray-700">{program.age}</span>
+            <span className="text-gray-700 font-medium">
+              {program.age || '전체'}
+            </span>
           </div>
+          
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">상세</span>
-            <div className="text-blue-600 font-medium flex items-center space-x-1">
-              <span>자세히 보기</span>
-              <ExternalLink className="w-3 h-3" />
-            </div>
+            <span className="text-gray-500">지역</span>
+            <span className="text-blue-600 font-medium">
+              {getRegionKorean(program.region) || '전국'}
+            </span>
           </div>
         </div>
       </div>
