@@ -44,7 +44,7 @@ export default function AIRoutePage() {
   });
 
   const [currentRoutes, setCurrentRoutes] = useState<RouteRecommendation[]>([]);
-  const [activeTab, setActiveTab] = useState<MobileTab>('chat');
+  const [activeTab, setActiveTab] = useState<MobileTab>('filters');
 
   // 결과가 생성되면 결과 탭으로 자동 이동
   useEffect(() => {
@@ -125,7 +125,10 @@ export default function AIRoutePage() {
                 <span className="text-sm font-medium text-blue-700">AI 여행 추천</span>
               </div>
             </div>
-            <ChatBot onRouteGenerated={handleRouteGenerated} />
+            <ChatBot 
+              onRouteGenerated={handleRouteGenerated} 
+              filters={filters}
+            />
           </div>
         )}
 
