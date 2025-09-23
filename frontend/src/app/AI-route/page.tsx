@@ -44,7 +44,7 @@ export default function AIRoutePage() {
   });
 
   const [currentRoutes, setCurrentRoutes] = useState<RouteRecommendation[]>([]);
-  const [activeTab, setActiveTab] = useState<MobileTab>('chat');
+  const [activeTab, setActiveTab] = useState<MobileTab>('filters');
 
   // 결과가 생성되면 결과 탭으로 자동 이동
   useEffect(() => {
