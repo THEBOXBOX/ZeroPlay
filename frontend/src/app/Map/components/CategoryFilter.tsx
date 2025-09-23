@@ -7,13 +7,15 @@ interface CategoryFilterProps {
   setActiveCategory: (category: string) => void;
   setShowBottomSheet: (show: boolean) => void;
   setShowLocalDeals: (show: boolean) => void;
+  onCategoryChange?: () => void;
 }
 
 const CategoryFilter: React.FC<CategoryFilterProps> = ({
   activeCategory,
   setActiveCategory,
   setShowBottomSheet,
-  setShowLocalDeals
+  setShowLocalDeals,
+  onCategoryChange
 }) => {
   const categories = [
     { id: '전체', name: '전체', icon: '📍' },
@@ -33,6 +35,10 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
               setActiveCategory(category.id);
               setShowBottomSheet(true);
               setShowLocalDeals(false);
+              // 🔥 상세보기 모드에서 리스트 모드로 전환
+              if (onCategoryChange) {
+                onCategoryChange();
+              }
             }}
             className={`flex items-center space-x-2 px-4 py-2 rounded-full border transition-all whitespace-nowrap ${
               activeCategory === category.id

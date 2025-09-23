@@ -38,7 +38,7 @@ export function useKakaoSdk() {
     const script = document.createElement('script');
     script.id = EXISTING_ID;
     script.async = true;
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_APPKEY}&autoload=false`;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false`;
     script.onload = () => {
       // autoload=false이므로 여기서 load 콜백 호출
       // @ts-ignore
