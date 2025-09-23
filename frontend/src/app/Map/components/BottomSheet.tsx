@@ -6,22 +6,16 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Heart, 
-  Navigation, 
   MapPin, 
-  Tag, 
   Phone, 
   Clock, 
   Star, 
-  ArrowLeft, 
-  ExternalLink, 
-  Share2,
-  Bookmark,
+  ExternalLink,
   Ticket,
   ChevronDown 
 } from 'lucide-react';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
-import BookmarkButton from './BookmarkButton';
 
 // 정렬 옵션 타입
 type SortOption = 'recommended' | 'distance' | 'rating';
