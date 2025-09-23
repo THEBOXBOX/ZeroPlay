@@ -6,6 +6,7 @@ import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
 import SpotListItem from './SpotListItem';
 import SpotDetailView from './SpotDetailView';
+import BusinessStatusBadge from './BusinessStatusBadge';
 
 // 정렬 옵션 타입
 type SortOption = 'recommended' | 'distance' | 'rating';
@@ -621,19 +622,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     return CATEGORY_MAP_REVERSE[category] || category;
   };
 
-  const getBusinessStatus = (spot: LocalSpot) => {
-    if (!spot.is_active) return { status: '운영종료', color: 'text-gray-500' };
-    
-    const now = new Date();
-    const hour = now.getHours();
-    
-    if (hour >= 9 && hour < 22) {
-      return { status: '영업중', color: 'text-green-600' };
-    } else {
-      return { status: '영업종료', color: 'text-orange-500' };
-    }
-  };
-
   // 경량화된 북마크 버튼 컴포넌트
   const OptimizedBookmarkButton: React.FC<{
     spotId: string;
@@ -736,7 +724,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
           ) : (
             <div className="space-y-0">
               {sortedDisplayData.map((spot: LocalSpot, index) => {
-                const businessStatus = getBusinessStatus(spot);
                 const spotDeal = getLocalDealForSpot(spot.id);
                 const distance = userLocation ? formatDistance(userLocation, spot) : '';
                 
@@ -749,7 +736,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
                     userLocation={userLocation}
                     spotDeal={spotDeal}
                     distance={distance}
-                    businessStatus={businessStatus}
+                    operatingHours={spot.operating_hours}
                     bookmarkStatuses={bookmarkStatuses}
                     bookmarkLoading={bookmarkLoading}
                     onSpotClick={onSpotClick}

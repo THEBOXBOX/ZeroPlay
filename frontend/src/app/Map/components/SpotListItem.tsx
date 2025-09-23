@@ -2,28 +2,9 @@
 
 import React from 'react';
 import { MapPin, Star, Heart } from 'lucide-react';
+import { LocalSpot } from '../lib/api';
+import BusinessStatusBadge from './BusinessStatusBadge';
 
-interface LocalSpot {
-  id: string;
-  name: string;
-  address: string;
-  category: 'experience' | 'culture' | 'restaurant' | 'cafe';
-  latitude: number;
-  longitude: number;
-  rating?: number;
-  review_count?: number;
-  price_range?: string;
-  business_hours?: {
-    [key: string]: { open: string; close: string; closed?: boolean };
-  };
-  phone?: string;
-  website?: string;
-  description?: string;
-  images?: string[];
-  is_active?: boolean;  // 🔧 undefined 허용
-  created_at?: string;
-  updated_at?: string;
-}
 
 interface LocalDeal {
   id: string;
@@ -42,10 +23,7 @@ interface SpotListItemProps {
   userLocation: { lat: number; lng: number } | null;
   spotDeal?: LocalDeal;
   distance?: string;
-  businessStatus: {
-    status: string;
-    color: string;
-  };
+  operatingHours?: Record<string, string>;
   bookmarkStatuses: Record<string, boolean>;
   bookmarkLoading: boolean;
   onSpotClick?: (spot: LocalSpot) => void;
@@ -81,7 +59,7 @@ const SpotListItem: React.FC<SpotListItemProps> = ({
   userLocation,
   spotDeal,
   distance,
-  businessStatus,
+  operatingHours,
   bookmarkStatuses,
   bookmarkLoading,
   onSpotClick,
@@ -143,9 +121,7 @@ const SpotListItem: React.FC<SpotListItemProps> = ({
         </p>
         
         <div className="flex items-center space-x-3 mb-2">
-          <span className={`text-sm font-medium ${businessStatus.color}`}>
-            {businessStatus.status}
-          </span>
+          <BusinessStatusBadge operatingHours={spot.operating_hours} />
           {spot.price_range && (
             <span className="text-sm text-blue-600 font-medium">
               {spot.price_range}
