@@ -1,5 +1,5 @@
 // src/app/Map/utils/bookmarkUtils.ts
-// 임시 localStorage 버전 (API 문제 해결 전까지 사용)
+// 실제 API 연동 버전 - localStorage 대신 DB 사용
 
 export interface BookmarkData {
   id: string;
@@ -12,140 +12,119 @@ export interface BookmarkData {
   local_deals?: any;
 }
 
-const BOOKMARK_STORAGE_KEY = 'temp_bookmarks';
-
-// 로컬 스토리지에서 북마크 가져오기
-const getLocalBookmarks = (): BookmarkData[] => {
-  if (typeof window === 'undefined') return [];
-  
-  try {
-    const stored = localStorage.getItem(BOOKMARK_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('북마크 로딩 오류:', error);
-    return [];
-  }
-};
-
-// 로컬 스토리지에 북마크 저장
-const saveLocalBookmarks = (bookmarks: BookmarkData[]): void => {
-  if (typeof window === 'undefined') return;
-  
-  try {
-    localStorage.setItem(BOOKMARK_STORAGE_KEY, JSON.stringify(bookmarks));
-  } catch (error) {
-    console.error('북마크 저장 오류:', error);
-  }
-};
-
-// 북마크 추가
+// 북마크 추가 - API 연동
 export const addBookmark = async (
   userId: string, 
   itemId: string, 
   type: 'spot' | 'deal'
 ): Promise<{ success: boolean; error?: string }> => {
-  console.log('🔖 addBookmark (localStorage):', { userId, itemId, type });
+  console.log('🔖 addBookmark (API):', { userId, itemId, type });
   
   try {
-    const bookmarks = getLocalBookmarks();
-    
-    // 중복 체크
-    const exists = bookmarks.some(bookmark => {
-      if (type === 'spot') {
-        return bookmark.user_id === userId && bookmark.spot_id === itemId;
-      } else {
-        return bookmark.user_id === userId && bookmark.deal_id === itemId;
-      }
-    });
-
-    if (exists) {
-      console.log('⚠️ 이미 북마크 존재');
-      return { success: false, error: '이미 북마크에 추가된 항목입니다.' };
-    }
-
-    // 새 북마크 추가
-    const newBookmark: BookmarkData = {
-      id: `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    const requestBody = {
       user_id: userId,
       bookmark_type: type,
-      created_at: new Date().toISOString(),
       ...(type === 'spot' ? { spot_id: itemId } : { deal_id: itemId })
     };
 
-    bookmarks.push(newBookmark);
-    saveLocalBookmarks(bookmarks);
+    const response = await fetch('/api/bookmarks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody)
+    });
 
-    console.log('✅ 북마크 추가 성공 (localStorage)');
-    return { success: true };
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      console.log('✅ 북마크 추가 성공 (API):', data);
+      return { success: true };
+    } else {
+      console.error('❌ 북마크 추가 실패 (API):', data);
+      return { 
+        success: false, 
+        error: data.error || '북마크 추가에 실패했습니다.' 
+      };
+    }
   } catch (error) {
-    console.error('💥 북마크 추가 오류 (localStorage):', error);
-    return { success: false, error: '북마크 추가 중 오류가 발생했습니다.' };
+    console.error('💥 북마크 추가 오류 (API):', error);
+    return { success: false, error: '네트워크 오류가 발생했습니다.' };
   }
 };
 
-// 북마크 삭제
+// 북마크 삭제 - API 연동
 export const removeBookmark = async (
   userId: string, 
   itemId: string, 
   type: 'spot' | 'deal'
 ): Promise<{ success: boolean; error?: string }> => {
-  console.log('🗑️ removeBookmark (localStorage):', { userId, itemId, type });
+  console.log('🗑️ removeBookmark (API):', { userId, itemId, type });
   
   try {
-    let bookmarks = getLocalBookmarks();
-    
-    // 삭제할 북마크 찾아서 제거
-    const initialLength = bookmarks.length;
-    bookmarks = bookmarks.filter(bookmark => {
-      if (bookmark.user_id !== userId) return true;
-      
-      if (type === 'spot') {
-        return bookmark.spot_id !== itemId;
-      } else {
-        return bookmark.deal_id !== itemId;
-      }
+    const params = new URLSearchParams({
+      user_id: userId,
+      ...(type === 'spot' ? { spot_id: itemId } : { deal_id: itemId })
     });
 
-    if (bookmarks.length === initialLength) {
-      console.log('⚠️ 삭제할 북마크 없음');
-      return { success: false, error: '삭제할 북마크를 찾을 수 없습니다.' };
+    const response = await fetch(`/api/bookmarks?${params}`, {
+      method: 'DELETE'
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      console.log('✅ 북마크 삭제 성공 (API):', data);
+      return { success: true };
+    } else {
+      console.error('❌ 북마크 삭제 실패 (API):', data);
+      return { 
+        success: false, 
+        error: data.error || '북마크 삭제에 실패했습니다.' 
+      };
     }
-
-    saveLocalBookmarks(bookmarks);
-
-    console.log('✅ 북마크 삭제 성공 (localStorage)');
-    return { success: true };
   } catch (error) {
-    console.error('💥 북마크 삭제 오류 (localStorage):', error);
-    return { success: false, error: '북마크 삭제 중 오류가 발생했습니다.' };
+    console.error('💥 북마크 삭제 오류 (API):', error);
+    return { success: false, error: '네트워크 오류가 발생했습니다.' };
   }
 };
 
-// 사용자 북마크 목록 조회
+// 사용자 북마크 목록 조회 - API 연동
 export const getUserBookmarks = async (
   userId: string
 ): Promise<{ success: boolean; bookmarks?: BookmarkData[]; error?: string }> => {
-  console.log('📋 getUserBookmarks (localStorage):', { userId });
+  console.log('📋 getUserBookmarks (API):', { userId });
   
   try {
-    const bookmarks = getLocalBookmarks();
-    const userBookmarks = bookmarks.filter(bookmark => bookmark.user_id === userId);
+    const response = await fetch(`/api/bookmarks?user_id=${userId}`, {
+      method: 'GET'
+    });
 
-    console.log('✅ 북마크 조회 성공 (localStorage):', { count: userBookmarks.length });
-    return { success: true, bookmarks: userBookmarks };
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      console.log('✅ 북마크 조회 성공 (API):', { count: data.bookmarks?.length });
+      return { success: true, bookmarks: data.bookmarks || [] };
+    } else {
+      console.error('❌ 북마크 조회 실패 (API):', data);
+      return { 
+        success: false, 
+        error: data.error || '북마크 조회에 실패했습니다.' 
+      };
+    }
   } catch (error) {
-    console.error('💥 북마크 조회 오류 (localStorage):', error);
-    return { success: false, error: '북마크 조회 중 오류가 발생했습니다.' };
+    console.error('💥 북마크 조회 오류 (API):', error);
+    return { success: false, error: '네트워크 오류가 발생했습니다.' };
   }
 };
 
-// 특정 아이템이 북마크되어 있는지 확인
+// 특정 아이템이 북마크되어 있는지 확인 - API 연동
 export const isBookmarked = async (
   userId: string, 
   itemId: string, 
   type: 'spot' | 'deal'
 ): Promise<{ success: boolean; isBookmarked?: boolean; error?: string }> => {
-  console.log('🔍 isBookmarked (localStorage):', { userId, itemId, type });
+  console.log('🔍 isBookmarked (API):', { userId, itemId, type });
   
   try {
     const result = await getUserBookmarks(userId);
@@ -162,21 +141,21 @@ export const isBookmarked = async (
       }
     });
 
-    console.log('🔍 북마크 확인 결과 (localStorage):', { bookmarked });
+    console.log('🔍 북마크 확인 결과 (API):', { bookmarked });
     return { success: true, isBookmarked: bookmarked };
   } catch (error) {
-    console.error('💥 북마크 확인 오류 (localStorage):', error);
+    console.error('💥 북마크 확인 오류 (API):', error);
     return { success: false, error: '북마크 확인 중 오류가 발생했습니다.' };
   }
 };
 
-// 북마크 토글 (수정된 버전 - 중복 체크 개선)
+// 북마크 토글 - API 연동
 export const toggleBookmark = async (
   userId: string, 
   itemId: string, 
   type: 'spot' | 'deal'
 ): Promise<{ success: boolean; isBookmarked?: boolean; error?: string }> => {
-  console.log('🔄 toggleBookmark (localStorage):', { userId, itemId, type });
+  console.log('🔄 toggleBookmark (API):', { userId, itemId, type });
   
   try {
     // 현재 북마크 상태 확인
@@ -202,39 +181,24 @@ export const toggleBookmark = async (
 
     if (result.success) {
       const newBookmarkState = !currentlyBookmarked;
-      console.log('✅ 토글 성공 (localStorage), 새 상태:', newBookmarkState);
+      console.log('✅ 토글 성공 (API), 새 상태:', newBookmarkState);
       return { success: true, isBookmarked: newBookmarkState };
     } else {
       console.error('❌ 토글 실패:', result.error);
       return { success: false, error: result.error };
     }
   } catch (error) {
-    console.error('💥 북마크 토글 오류 (localStorage):', error);
+    console.error('💥 북마크 토글 오류 (API):', error);
     return { success: false, error: '북마크 처리 중 오류가 발생했습니다.' };
   }
 };
 
-// 디버깅용 함수들
-export const debugBookmarks = (): void => {
-  if (typeof window === 'undefined') return;
-  
-  const bookmarks = getLocalBookmarks();
-  console.log('🐛 전체 북마크 목록:', bookmarks);
-};
-
-export const clearAllBookmarks = (): void => {
-  if (typeof window === 'undefined') return;
-  
-  localStorage.removeItem(BOOKMARK_STORAGE_KEY);
-  console.log('🧹 모든 북마크 삭제됨');
-};
-
-// 일괄 북마크 상태 조회 (성능 최적화용)
+// 일괄 북마크 상태 조회 (성능 최적화용) - API 연동
 export const getMultipleBookmarkStatus = async (
   itemIds: string[], 
   itemType: 'spot' | 'deal'
 ): Promise<Record<string, boolean>> => {
-  console.log('🔍 일괄 북마크 상태 조회 (localStorage):', { count: itemIds.length, itemType });
+  console.log('🔍 일괄 북마크 상태 조회 (API):', { count: itemIds.length, itemType });
   
   if (itemIds.length === 0) {
     return {};
@@ -273,14 +237,14 @@ export const getMultipleBookmarkStatus = async (
       }
     });
 
-    console.log('✅ 일괄 북마크 조회 성공 (localStorage):', { 
+    console.log('✅ 일괄 북마크 조회 성공 (API):', { 
       총개수: itemIds.length, 
       북마크된개수: Object.values(statusMap).filter(Boolean).length 
     });
     
     return statusMap;
   } catch (error) {
-    console.error('💥 일괄 북마크 조회 오류 (localStorage):', error);
+    console.error('💥 일괄 북마크 조회 오류 (API):', error);
     
     // 실패 시 모든 항목을 false로 반환
     const fallback: Record<string, boolean> = {};
@@ -289,4 +253,13 @@ export const getMultipleBookmarkStatus = async (
     });
     return fallback;
   }
+};
+
+// 디버깅용 함수들
+export const debugBookmarks = (): void => {
+  console.log('🐛 API 버전 사용 중 - localStorage 디버깅 불가');
+};
+
+export const clearAllBookmarks = (): void => {
+  console.log('🧹 API 버전에서는 개별 삭제만 가능');
 };

@@ -17,19 +17,19 @@ export default function BottomNavigation({
 }: BottomNavigationProps) {
   const tabs = [
     {
-      id: 'chat' as MobileTab,
-      icon: '💬',
-      label: 'AI 추천',
-      activeColor: 'bg-blue-50 text-blue-600',
-      disabled: false
-    },
-    {
       id: 'filters' as MobileTab,
       icon: '⚙️',
       label: '여행 조건',
       activeColor: 'bg-indigo-50 text-indigo-600',
       disabled: false,
       badge: activeFiltersCount
+    },
+    {
+      id: 'chat' as MobileTab,
+      icon: '💬',
+      label: 'AI 추천',
+      activeColor: 'bg-blue-50 text-blue-600',
+      disabled: false
     },
     {
       id: 'results' as MobileTab,

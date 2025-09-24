@@ -196,25 +196,11 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
     }
   };
 
-  const handleQuickQuestion = (question: string) => {
-    setInputValue(question);
-    setTimeout(() => {
-      handleSendMessage();
-    }, 100);
-  };
-
-  const quickQuestions = [
-    '서울에서 데이트 코스 추천해주세요',
-    '부산 맛집 투어를 계획하고 있어요',
-    '제주도 자연 힐링 여행 추천',
-    '친구들과 즐길 수 있는 서울 명소'
-  ];
-
   return (
     <div className="h-full bg-white flex flex-col">
       
       {/* 메시지 영역 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-2">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -274,47 +260,8 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 빠른 응답 버튼들 */}
-      <div className="px-4 py-3 bg-gray-50 border-t">
-        <div className="space-y-2">
-          {quickQuestions.slice(0, 4).map((question, index) => (
-            <div key={index} className="flex justify-between items-center">
-              {index % 2 === 0 ? (
-                // 좌측 버튼 (봇)
-                <>
-                  <button
-                    onClick={() => handleQuickQuestion(question)}
-                    className="bg-white hover:bg-gray-50 px-4 py-3 rounded-2xl transition-colors border shadow-sm flex items-center max-w-[75%]"
-                  >
-                    <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-2 flex-shrink-0">
-                      <span className="text-white text-xs">🤖</span>
-                    </div>
-                    <span className="text-sm text-gray-700 text-left">{question}</span>
-                  </button>
-                  <div className="w-8 h-8"></div>
-                </>
-              ) : (
-                // 우측 버튼 (유저)
-                <>
-                  <div className="w-8 h-8"></div>
-                  <button
-                    onClick={() => handleQuickQuestion(question)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-2xl transition-colors shadow-sm flex items-center max-w-[75%]"
-                  >
-                    <span className="text-sm text-left">{question}</span>
-                    <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center ml-2 flex-shrink-0">
-                      <span className="text-blue-500 text-xs">👤</span>
-                    </div>
-                  </button>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 입력 영역 */}
-      <div className="bg-white p-4 border-t">
+      {/* 입력 영역 - 🔥 패딩 제거하고 AI 네비게이션과 붙임 */}
+      <div className="bg-white px-4 py-3 border-t-0">
         <div className="bg-gray-100 rounded-2xl p-2 flex items-center gap-3">
           <input
             ref={inputRef}
