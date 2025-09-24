@@ -10,16 +10,16 @@ const MapPage = () => {
   const [activeTab, setActiveTab] = React.useState('지도');
 
   return (
-    <div className="w-full max-w-md mx-auto bg-gray-50 h-screen flex flex-col relative overflow-hidden border border-gray-300">
+    <div className="w-full max-w-[393px] mx-auto bg-white h-screen flex flex-col relative overflow-hidden">
 
       {/* 공통 헤더 컴포넌트 사용 */}
       <div className="flex-shrink-0">
         <Header 
-          title="ZeroPlay"
+          title="mySUBWAY"
           onSearchClick={() => console.log('검색 클릭')}
           onNotificationClick={() => console.log('알림 클릭')}
           onSettingsClick={() => console.log('설정 클릭')}
-          className="h-[60px] border-b border-gray-100"
+          className="h-[70px] border-b border-gray-100"
         />
       </div>
       

@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <div 
-      className={`bg-white px-4 flex items-center justify-between border-b border-gray-100 h-[70px] ${className}`}
+      className={`bg-white py-2 flex items-center justify-between border-b border-gray-100 h-[70px] ${className}`}
     >
       {/* 로고 영역 */}
       <div className="flex items-center">

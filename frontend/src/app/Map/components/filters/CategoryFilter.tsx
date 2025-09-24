@@ -26,8 +26,8 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
   ];
 
   return (
-    <div className="bg-white px-4 py-3 border-b border-gray-100">
-      <div className="flex space-x-2 overflow-x-auto">
+    <div className="bg-white px-2 py-3 border-b border-gray-100">
+      <div className="flex justify-between gap-1">
         {categories.map((category) => (
           <button
             key={category.id}
@@ -40,14 +40,14 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 onCategoryChange();
               }
             }}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-full border transition-all whitespace-nowrap ${
+            className={`flex items-center justify-center space-x-1 px-3 py-2 rounded-full border transition-all flex-1 ${
               activeCategory === category.id
                 ? 'bg-black text-white border-black'
                 : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
             }`}
           >
             <span className="text-sm">{category.icon}</span>
-            <span className="text-sm font-medium">{category.name}</span>
+            <span className="text-xs font-medium">{category.name}</span>
           </button>
         ))}
       </div>
