@@ -1,4 +1,3 @@
-// src/app/Map/components/BusinessStatusBadge.tsx
 'use client';
 
 import React from 'react';
