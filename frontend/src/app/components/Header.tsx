@@ -17,8 +17,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({
-  title = "ZeroPlay",
-  logoSrc = "/logo.svg", // 기본값으로 logo.png 설정
+  title = "mySUBWAY",
+  logoSrc = "/logo.png", // 기본값으로 logo.png 설정
   showSearch = true,
   showNotification = true,
   showSettings = true,
@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <div 
-      className={`bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 ${className}`}
+      className={`bg-white px-4 flex items-center justify-between border-b border-gray-100 h-[70px] ${className}`}
     >
       {/* 로고 영역 */}
       <div className="flex items-center">
@@ -40,6 +40,8 @@ const Header: React.FC<HeaderProps> = ({
           height={128}
           className="h-10 w-auto"
           priority
+          quality={100}
+          style={{ objectFit: 'contain' }}
         />
       </div>
       

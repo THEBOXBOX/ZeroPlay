@@ -110,7 +110,7 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* 공통 헤더 컴포넌트 */}
       <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
         <Header 
@@ -124,9 +124,9 @@ const HomePage = () => {
 
       {/* Main Content */}
       <div 
-        className="max-w-[393px] mx-auto bg-white"
+        className="max-w-[393px] mx-auto bg-gray-50"
         style={{ 
-          marginTop: '60px',
+          marginTop: '70px',
           minHeight: 'calc(100vh - 160px)'
         }}
       >
