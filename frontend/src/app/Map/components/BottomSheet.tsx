@@ -322,8 +322,6 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     );
   };
 
-
-
   if (!showBottomSheet) return null;
 
   const DRAG_HANDLE_HEIGHT = 12;
