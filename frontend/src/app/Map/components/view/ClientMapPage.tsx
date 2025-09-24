@@ -44,7 +44,7 @@ export default function ClientMapPage({ appKey }: { appKey: string }) {
       {/* 헤더 */}
       <div className="flex-shrink-0">
         <Header 
-          title="mySUBWAY"
+          title="ZeroPlay"
           onSearchClick={() => console.log('검색 클릭')}
           onNotificationClick={() => console.log('알림 클릭')}
           onSettingsClick={() => console.log('설정 클릭')}

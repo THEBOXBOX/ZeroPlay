@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header'; // 공통 헤더 import
 import BottomNavBar from './components/NavBar'; // 공통 네비바 import
 import { BenefitsSection, AIRoutesSection, LocalDealsSection } from './components';
+import Image from 'next/image';
 
 const HomePage = () => {
   const [activeTab, setActiveTab] = useState('홈');
@@ -17,19 +18,19 @@ const HomePage = () => {
         id: 1, 
         title: "청년 여행 지원금", 
         subtitle: "최대 20만원 지원",
-        bgColor: "#4f46e5" 
+        image: "/Banner01.png"
       },
       { 
         id: 2, 
         title: "AI 맞춤 루트 추천", 
         subtitle: "나만의 여행 코스",
-        bgColor: "#059669" 
+        image: "/Banner02.png"
       },
       { 
         id: 3, 
         title: "로컬딜 특가", 
         subtitle: "지역 맛집 할인",
-        bgColor: "#dc2626" 
+        image: "/Banner03.png"
       },
     ];
 
@@ -65,23 +66,17 @@ const HomePage = () => {
               style={{
                 minWidth: "100%",
                 height: "250px",
-                backgroundColor: banner.bgColor,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                fontSize: "18px",
-                fontWeight: "bold",
-                color: "white",
-                flexDirection: "column",
-                gap: "8px"
+                position: "relative"
               }}
             >
-              <div style={{ fontSize: "20px", fontWeight: "bold" }}>
-                {banner.title}
-              </div>
-              <div style={{ fontSize: "16px", opacity: 0.9 }}>
-                {banner.subtitle}
-              </div>
+              <Image
+                src={banner.image}
+                alt={banner.title}
+                fill
+                style={{
+                  objectFit: 'cover'
+                }}
+              />
             </div>
           ))}
         </div>
@@ -102,7 +97,8 @@ const HomePage = () => {
                 width: "8px",
                 height: "8px",
                 borderRadius: "50%",
-                backgroundColor: index === currentIndex ? "white" : "rgba(255,255,255,0.5)",
+                backgroundColor: index === currentIndex ? 
+                  "white" : "rgba(255,255,255,0.5)",
                 cursor: "pointer"
               }}
               onClick={() => setCurrentIndex(index)}
@@ -118,7 +114,7 @@ const HomePage = () => {
       {/* 공통 헤더 컴포넌트 */}
       <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
         <Header 
-          title="mySUBWAY"
+          title="ZeroPlay"
           showSearch={false} // 홈에서는 검색 버튼 숨김
           onNotificationClick={() => console.log('알림 클릭')}
           onSettingsClick={() => console.log('설정 클릭')}

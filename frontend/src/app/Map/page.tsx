@@ -15,7 +15,7 @@ const MapPage = () => {
       {/* 공통 헤더 컴포넌트 사용 */}
       <div className="flex-shrink-0">
         <Header 
-          title="mySUBWAY"
+          title="ZeroPlay"
           onSearchClick={() => console.log('검색 클릭')}
           onNotificationClick={() => console.log('알림 클릭')}
           onSettingsClick={() => console.log('설정 클릭')}
