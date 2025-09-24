@@ -1,4 +1,3 @@
-// frontend/src/app/Map/components/BookmarkButton.tsx - 안전한 버전
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -179,3 +178,71 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
 };
 
 export default BookmarkButton;
+
+// ============================================================================
+// 경량화된 북마크 버튼 (바텀시트용) - 상태를 외부에서 받아서 표시만 담당
+// ============================================================================
+
+export interface OptimizedBookmarkButtonProps {
+  spotId: string;
+  variant?: 'default' | 'icon-only';
+  className?: string;
+  bookmarkStatuses: Record<string, boolean>;
+  bookmarkLoading: boolean;
+  onBookmarkToggle: (spotId: string, isCurrentlyBookmarked: boolean) => void;
+}
+
+export const OptimizedBookmarkButton: React.FC<OptimizedBookmarkButtonProps> = ({ 
+  spotId, 
+  variant = 'default', 
+  className = '',
+  bookmarkStatuses,
+  bookmarkLoading,
+  onBookmarkToggle
+}) => {
+  const isBookmarkedState = bookmarkStatuses[spotId] || false;
+  
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBookmarkToggle(spotId, isBookmarkedState);
+  };
+
+  if (variant === 'icon-only') {
+    return (
+      <button 
+        onClick={handleClick}
+        className={`${className}`}
+        disabled={bookmarkLoading}
+      >
+        <Heart 
+          className={`w-5 h-5 transition-colors ${
+            isBookmarkedState 
+              ? 'text-red-500 fill-red-500' 
+              : 'text-gray-400 hover:text-red-400'
+          }`} 
+        />
+      </button>
+    );
+  }
+
+  return (
+    <button 
+      onClick={handleClick}
+      className={`flex items-center space-x-2 px-3 py-2 border rounded-lg transition-colors ${
+        isBookmarkedState 
+          ? 'border-red-200 bg-red-50 text-red-600' 
+          : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-red-200 hover:bg-red-50 hover:text-red-600'
+      } ${className}`}
+      disabled={bookmarkLoading}
+    >
+      <Heart 
+        className={`w-4 h-4 ${
+          isBookmarkedState ? 'fill-red-500 text-red-500' : ''
+        }`} 
+      />
+      <span className="text-sm">
+        {isBookmarkedState ? '저장됨' : '저장'}
+      </span>
+    </button>
+  );
+};

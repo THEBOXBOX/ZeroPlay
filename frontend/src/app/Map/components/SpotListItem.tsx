@@ -4,7 +4,7 @@ import React from 'react';
 import { MapPin, Star, Heart } from 'lucide-react';
 import { LocalSpot } from '../lib/api';
 import BusinessStatusBadge from './BusinessStatusBadge';
-
+import { getCategoryIcon, getCategoryName } from './CategoryHelper';
 
 interface LocalDeal {
   id: string;
@@ -29,28 +29,6 @@ interface SpotListItemProps {
   onSpotClick?: (spot: LocalSpot) => void;
   onBookmarkToggle: (spotId: string, currentStatus: boolean) => void;
 }
-
-// 카테고리 한글명 매핑
-const getCategoryName = (category: string) => {
-  const categoryMap = {
-    'experience': '체험',
-    'culture': '문화',
-    'restaurant': '맛집', 
-    'cafe': '카페'
-  };
-  return categoryMap[category as keyof typeof categoryMap] || category;
-};
-
-// 카테고리 아이콘 매핑
-const getCategoryIcon = (category: string) => {
-  const iconMap = {
-    'experience': '🎪',
-    'culture': '🎭',
-    'restaurant': '🍽️',
-    'cafe': '☕'
-  };
-  return iconMap[category as keyof typeof iconMap] || '📍';
-};
 
 const SpotListItem: React.FC<SpotListItemProps> = ({
   spot,

@@ -14,6 +14,7 @@ import {
 import { getUserBookmarks, removeBookmark } from '../utils/bookmarkUtils';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
 import { useLocalSpots } from '../hooks/useLocalSpots';
+import { getCategoryIcon, getCategoryName } from './CategoryHelper';
 
 interface BookmarkData {
   id?: string;
@@ -103,20 +104,6 @@ const BookmarkList: React.FC<{ onBack?: () => void }> = ({ onBack }) => {
   useEffect(() => {
     loadBookmarks();
   }, []);
-
-  const getCategoryIcon = (category?: string) => {
-    const icons: Record<string, string> = {
-      experience: '🎨',
-      culture: '🏛️',
-      restaurant: '🍽️',
-      cafe: '☕',
-    };
-    return icons[category || 'restaurant'] || '📍';
-  };
-
-  const getCategoryName = (category?: string) => {
-    return CATEGORY_MAP_REVERSE[category as keyof typeof CATEGORY_MAP_REVERSE] || category || '기타';
-  };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
