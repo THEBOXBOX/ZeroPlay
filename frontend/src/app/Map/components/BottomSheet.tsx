@@ -13,6 +13,7 @@ import { calculateDistance, formatDistance, sortSpots } from './SortingUtils';
 import { getUserId } from '../utils/UserIdUtils';
 import { useBookmarkManager } from '../hooks/useBookmarkManager';
 import { useDisplayData } from '../hooks/useDisplayData';
+import ListHeader from './ListHeader';
 
 // Props 인터페이스
 interface BottomSheetProps {
@@ -145,35 +146,16 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     return (
       <div className="h-full flex flex-col">
         {/* 헤더 */}
-        <div className="px-4 pb-3 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {titleText}
-            </h3>
-            
-            {/* 정렬 드롭다운 */}
-            <div className="mt-1">
-              <SortDropdown 
-                currentSort={sortBy}
-                onSortChange={setSortBy}
-                userLocation={userLocation}
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3 text-sm text-gray-500">
-            <span>{sortedDisplayData.length}개의 장소</span>
-            {showLocalDeals && (
-              <span className="text-green-600 font-medium">🎟️ 쿠폰 제공</span>
-            )}
-            {(loading || bookmarkLoading) && (
-              <div className="flex items-center space-x-1">
-                <div className="animate-spin w-3 h-3 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                <span>{loading ? '로딩중' : '북마크 로딩중'}</span>
-              </div>
-            )}
-          </div>
-        </div>
+        <ListHeader
+          activeCategory={activeCategory}
+          showLocalDeals={showLocalDeals}
+          dataLength={sortedDisplayData.length}
+          loading={loading}
+          bookmarkLoading={bookmarkLoading}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          userLocation={userLocation}
+        />
 
         {/* 스팟 리스트 */}
         <div className="flex-1 overflow-y-auto scrollbar-hide">
