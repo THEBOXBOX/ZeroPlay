@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 const router = Router();
-const GOOGLE_KEY = process.env.GOOGLE_MAPS_API_KEY!;
+const GOOGLE_KEY = process.env.GOOGLE_MAPS_API_KEY! || process.env.GOOGLE_PLACES_API_KEY!;
 if (!GOOGLE_KEY) {
   // 서버 부팅 시점에서 키 없으면 바로 알림
   console.warn('[photo] GOOGLE_MAPS_API_KEY not set. /api/photo will fail.');

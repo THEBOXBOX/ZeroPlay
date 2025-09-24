@@ -109,36 +109,57 @@ const SpotDetailView: React.FC<SpotDetailViewProps> = ({
       {/* 스크롤 가능한 콘텐츠 */}
       <div className="flex-1 overflow-y-auto">
         {/* 이미지 갤러리 */}
-        {spot.images && spot.images.length > 0 && (
-          <div className="relative h-48 bg-gray-100">
-            <img 
-              src={spot.images[currentImageIndex]} 
-              alt={spot.name}
-              className="w-full h-full object-cover"
-            />
+        {(() => {
+          const parseImageUrls = (imagesData: any): string[] => {
+            if (!imagesData) return [];
             
-            {spot.images.length > 1 && (
-              <>
-                <button 
-                  onClick={onPrevImage}
-                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button 
-                  onClick={onNextImage}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-                
-                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded text-xs">
-                  {currentImageIndex + 1} / {spot.images.length}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+            try {
+              if (typeof imagesData === 'string') {
+                const parsed = JSON.parse(imagesData);
+                if (Array.isArray(parsed)) {
+                  return parsed;
+                }
+              }
+              if (Array.isArray(imagesData)) {
+                return imagesData;
+              }
+            } catch (error) {
+              console.error('이미지 파싱 에러:', error);
+            }
+            
+            return [];
+          };
+
+          const imageUrls = parseImageUrls(spot.images);
+          
+          return imageUrls.length > 0 ? (
+            <div className="relative h-48 bg-gray-100">
+              <img 
+                src={imageUrls[currentImageIndex]} 
+                alt={spot.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('이미지 로드 실패:', imageUrls[currentImageIndex]);
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+              
+              {imageUrls.length > 1 && (
+                <>
+                  <button onClick={onPrevImage} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full">
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button onClick={onNextImage} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-2 rounded-full">
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-2 py-1 rounded text-xs">
+                    {currentImageIndex + 1} / {imageUrls.length}
+                  </div>
+                </>
+              )}
+            </div>
+          ) : null;
+        })()}
 
         {/* 기본 정보 */}
         <div className="p-4">

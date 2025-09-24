@@ -11,7 +11,8 @@ import { LocalDeal, DUMMY_LOCAL_DEALS, hasLocalDeal, getLocalDealForSpot } from 
 import { getCategoryIcon, getCategoryName } from './CategoryHelper';
 import { calculateDistance, formatDistance, sortSpots } from './SortingUtils';
 import { getUserId } from '../utils/UserIdUtils';
-import { useBookmarkManager } from '../hooks/UseBookmarkManager';
+import { useBookmarkManager } from '../hooks/useBookmarkManager';
+import { useDisplayData } from '../hooks/useDisplayData';
 
 // Props 인터페이스
 interface BottomSheetProps {
@@ -78,28 +79,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({
     }
   }, []);
 
-  // 표시할 데이터 계산 (메모이제이션)
-  const displayData = useMemo((): LocalSpot[] => {
-    if (showLocalDeals) {
-      const localDealSpots = spots.filter(spot => hasLocalDeal(spot.id));
-      console.log('🎟️ 로컬딜 보유 스팟:', localDealSpots.length, '개');
-      return localDealSpots;
-    } else if (activeCategory === '전체') {
-      return spots;
-    } else {
-      const categoryKey = {
-        '체험': 'experience',
-        '문화': 'culture',
-        '맛집': 'restaurant',
-        '카페': 'cafe'
-      }[activeCategory] as keyof typeof CATEGORY_MAP_REVERSE;
-      
-      if (categoryKey) {
-        return spots.filter(spot => spot.category === categoryKey);
-      }
-      return spots;
-    }
-  }, [spots, showLocalDeals, activeCategory]);
+  const { displayData } = useDisplayData(spots, showLocalDeals, activeCategory);
 
   // 정렬된 데이터 계산
   const sortedDisplayData = useMemo((): LocalSpot[] => {
