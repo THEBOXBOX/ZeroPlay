@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { MapPin, Star, Heart } from 'lucide-react';
-import { LocalSpot } from '../lib/api';
+import { LocalSpot } from '../../lib/api';
 import BusinessStatusBadge from './BusinessStatusBadge';
-import { getCategoryIcon, getCategoryName } from './CategoryHelper';
+import { getCategoryIcon, getCategoryName } from '../utils/CategoryHelper';
 
 interface LocalDeal {
   id: string;

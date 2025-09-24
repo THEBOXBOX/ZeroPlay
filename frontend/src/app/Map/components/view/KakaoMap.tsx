@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { LocalSpot, CATEGORY_COLORS } from '../lib/api';
+import { LocalSpot, CATEGORY_COLORS } from '../../lib/api';
 
 declare global {
   interface Window {

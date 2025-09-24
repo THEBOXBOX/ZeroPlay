@@ -1,100 +1,183 @@
-import Link from 'next/link';
+'use client';
 
-export default function HomePage() {
+import React, { useState, useEffect, useRef } from 'react';
+import Header from './components/Header'; // 공통 헤더 import
+import BottomNavBar from './components/NavBar'; // 공통 네비바 import
+import { BenefitsSection, AIRoutesSection, LocalDealsSection } from './components';
+
+const HomePage = () => {
+  const [activeTab, setActiveTab] = useState('홈');
+
+  const BannerSlider = () => {
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const bannerRef = useRef(null);
+
+    const banners = [
+      { 
+        id: 1, 
+        title: "청년 여행 지원금", 
+        subtitle: "최대 20만원 지원",
+        bgColor: "#4f46e5" 
+      },
+      { 
+        id: 2, 
+        title: "AI 맞춤 루트 추천", 
+        subtitle: "나만의 여행 코스",
+        bgColor: "#059669" 
+      },
+      { 
+        id: 3, 
+        title: "로컬딜 특가", 
+        subtitle: "지역 맛집 할인",
+        bgColor: "#dc2626" 
+      },
+    ];
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % banners.length);
+      }, 3000);
+
+      return () => clearInterval(interval);
+    }, [banners.length]);
+
+    return (
+      <div
+        style={{
+          overflow: "hidden",
+          width: "100%",
+          height: "250px",
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        <div
+          ref={bannerRef}
+          style={{
+            display: "flex",
+            transition: "transform 0.5s ease-in-out",
+            transform: `translateX(-${currentIndex * 100}%)`,
+          }}
+        >
+          {banners.map((banner) => (
+            <div
+              key={banner.id}
+              style={{
+                minWidth: "100%",
+                height: "250px",
+                backgroundColor: banner.bgColor,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                fontSize: "18px",
+                fontWeight: "bold",
+                color: "white",
+                flexDirection: "column",
+                gap: "8px"
+              }}
+            >
+              <div style={{ fontSize: "20px", fontWeight: "bold" }}>
+                {banner.title}
+              </div>
+              <div style={{ fontSize: "16px", opacity: 0.9 }}>
+                {banner.subtitle}
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* 인디케이터 */}
+        <div style={{
+          position: "absolute",
+          bottom: "16px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: "8px"
+        }}>
+          {banners.map((_, index) => (
+            <div
+              key={index}
+              style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                backgroundColor: index === currentIndex ? "white" : "rgba(255,255,255,0.5)",
+                cursor: "pointer"
+              }}
+              onClick={() => setCurrentIndex(index)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            🗺️ 로컬 체험 지도 프로젝트
-          </h1>
-          <p className="text-xl text-gray-600 mb-12">
-            청년들을 위한 지역별 특색 있는 로컬 스팟과 실시간 할인정보 서비스
-          </p>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {/* Epic 1 */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-gray-500">
-              <div className="text-center">
-                <div className="text-3xl mb-4">🏗️</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Epic 1</h3>
-                <p className="text-gray-600 text-sm mb-4">기반 인프라 구축</p>
-                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">완료</span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* 공통 헤더 컴포넌트 */}
+      <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
+        <Header 
+          title="mySUBWAY"
+          showSearch={false} // 홈에서는 검색 버튼 숨김
+          onNotificationClick={() => console.log('알림 클릭')}
+          onSettingsClick={() => console.log('설정 클릭')}
+          className="h-[60px] border-b border-gray-100"
+        />
+      </div>
 
-            {/* Epic 2 */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-              <div className="text-center">
-                <div className="text-3xl mb-4">🗺️</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Epic 2</h3>
-                <p className="text-gray-600 text-sm mb-4">지도 기반 로컬 체험 서비스</p>
-                <Link 
-                  href="/Map" 
-                  className="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                >
-                  진행 중
-                </Link>
-              </div>
-            </div>
+      {/* Main Content */}
+      <div 
+        className="max-w-[393px] mx-auto bg-white"
+        style={{ 
+          marginTop: '60px',
+          minHeight: 'calc(100vh - 160px)'
+        }}
+      >
+        {/* Banner Carousel - 393px 컨테이너 안에서 꽉 채우기 */}
+        <div className="w-full relative">
+          <BannerSlider />
+        </div>
 
-            {/* Epic 3 */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-              <div className="text-center">
-                <div className="text-3xl mb-4">🎯</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Epic 3</h3>
-                <p className="text-gray-600 text-sm mb-4">청년 혜택 정보 제공</p>
-                <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">대기</span>
-              </div>
-            </div>
-
-            {/* Epic 4 */}
-            <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
-              <div className="text-center">
-                <div className="text-3xl mb-4">🤖</div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Epic 4</h3>
-                <p className="text-gray-600 text-sm mb-4">AI 기반 맞춤 코스 추천</p>
-                <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">대기</span>
-              </div>
-            </div>
+        {/* Sections */}
+        <div className="px-4 pt-2 pb-20 space-y-6">
+          {/* Section 01: 청년 혜택 정보 */}
+          <div className="mt-2">
+            <BenefitsSection 
+              title="💎 합리적 여행의 시작, 청년 혜택 모음.zip"
+              limit={4}
+              showMore={true}
+            />
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6">📊 전체 프로젝트 진행 상황</h3>
-            <div className="grid md:grid-cols-3 gap-6 text-left">
-              <div>
-                <h4 className="font-semibold text-green-600 mb-3">✅ 완료 (Epic 1)</h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• Next.js 프로젝트 설정</li>
-                  <li>• Supabase 데이터베이스 연동</li>
-                  <li>• 기본 API 서버 구축</li>
-                  <li>• 공통 UI 컴포넌트</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-blue-600 mb-3">🔄 진행 중 (Epic 2)</h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• MAP-001: 기본 지도 ✅</li>
-                  <li>• MAP-002: 현재 위치 🔄</li>
-                  <li>• MAP-003: DB 스키마 ⏳</li>
-                  <li>• MAP-004: 더미 데이터 ⏳</li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-semibold text-gray-600 mb-3">⏳ 예정 (Epic 3,4)</h4>
-                <ul className="space-y-2 text-sm text-gray-600">
-                  <li>• 청년 혜택 데이터 수집</li>
-                  <li>• 혜택 정보 UI 구현</li>
-                  <li>• AI 추천 알고리즘</li>
-                  <li>• 코스 생성 기능</li>
-                </ul>
-              </div>
-            </div>
+          {/* Section 02: AI 루트 추천 */}
+          <div>
+            <AIRoutesSection 
+              title="✈️ 고민 끝! AI가 추천하는 코스 모음.zip"
+              showRoutes={true}
+            />
+          </div>
+
+          {/* Section 03: 로컬딜 */}
+          <div>
+            <LocalDealsSection 
+              title="🔥 단기간 오픈! 여행을 가치로 바꾸는 로컬딜"
+              limit={6}
+              layout="card"
+            />
           </div>
         </div>
       </div>
+
+      {/* 공통 하단 네비게이션 */}
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
+        <BottomNavBar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+      </div>
     </div>
   );
-}
+};
+
+export default HomePage;

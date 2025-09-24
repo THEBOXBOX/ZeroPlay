@@ -5,7 +5,7 @@
 
 import { useMemo } from 'react';
 import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
-import { hasLocalDeal } from '../components/LocalDealsData';
+import { hasLocalDeal } from '../components/localdeals/LocalDealsData';
 
 interface UseDisplayDataReturn {
   displayData: LocalSpot[];

@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Heart, MapPin, ChevronDown } from 'lucide-react';
-import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
-import { toggleBookmark, isBookmarked } from '../utils/bookmarkUtils';
-import SpotListItem from './SpotListItem';
-import SpotDetailView from './SpotDetailView';
+import { LocalSpot, CATEGORY_MAP_REVERSE } from '../../lib/api';
+import { toggleBookmark, isBookmarked } from '../../utils/bookmarkUtils';
+import SpotListItem from '../spots/SpotListItem';
+import SpotDetailView from '../spots/SpotDetailView';
 import SortDropdown, { SortOption } from './SortDropdown';
-import { LocalDeal, DUMMY_LOCAL_DEALS, hasLocalDeal, getLocalDealForSpot } from './LocalDealsData';
-import { getCategoryIcon, getCategoryName } from './CategoryHelper';
-import { calculateDistance, formatDistance, sortSpots } from './SortingUtils';
-import { getUserId } from '../utils/UserIdUtils';
-import { useBookmarkManager } from '../hooks/useBookmarkManager';
-import { useDisplayData } from '../hooks/useDisplayData';
+import { LocalDeal, DUMMY_LOCAL_DEALS, hasLocalDeal, getLocalDealForSpot } from '../localdeals/LocalDealsData';
+import { getCategoryIcon, getCategoryName } from '../utils/CategoryHelper';
+import { calculateDistance, formatDistance, sortSpots } from '../utils/SortingUtils';
+import { getUserId } from '../../utils/UserIdUtils';
+import { useBookmarkManager } from '../../hooks/useBookmarkManager';
+import { useDisplayData } from '../../hooks/useDisplayData';
 import ListHeader from './ListHeader';
 
 // Props 인터페이스

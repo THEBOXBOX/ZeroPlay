@@ -12,7 +12,7 @@ import {
   ExternalLink,
   Ticket 
 } from 'lucide-react';
-import { LocalSpot } from '../lib/api';
+import { LocalSpot } from '../../lib/api';
 
 interface SpotDetailViewProps {
   spot: LocalSpot;

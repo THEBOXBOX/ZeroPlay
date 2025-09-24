@@ -3,8 +3,8 @@
 
 import React from 'react';
 import MapView from './MapView';
-import Header from '../../components/Header'; // 공통 헤더 import
-import BottomNavBar from '../../components/NavBar'; // 공통 네비바 import
+import Header from '../../../components/Header'; // 공통 헤더 import
+import BottomNavBar from '../../../components/NavBar'; // 공통 네비바 import
 import { Bell, Settings, Search, Home, Route, Gift, MapPin, User } from 'lucide-react';
 
 export default function ClientMapPage({ appKey }: { appKey: string }) {

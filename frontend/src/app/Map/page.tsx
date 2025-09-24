@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import MapView from './components/MapView';
+import MapView from './components/view/MapView';
 import Header from '../components/Header'; // 공통 헤더 import
 import BottomNavBar from '../components/NavBar'; // 공통 네비바 import
 

@@ -11,10 +11,10 @@ import {
   ArrowLeft,
   RefreshCw
 } from 'lucide-react';
-import { getUserBookmarks, removeBookmark } from '../utils/bookmarkUtils';
-import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
-import { useLocalSpots } from '../hooks/useLocalSpots';
-import { getCategoryIcon, getCategoryName } from './CategoryHelper';
+import { getUserBookmarks, removeBookmark } from '../../utils/bookmarkUtils';
+import { LocalSpot, CATEGORY_MAP_REVERSE } from '../../lib/api';
+import { useLocalSpots } from '../../hooks/useLocalSpots';
+import { getCategoryIcon, getCategoryName } from '../utils/CategoryHelper';
 
 interface BookmarkData {
   id?: string;

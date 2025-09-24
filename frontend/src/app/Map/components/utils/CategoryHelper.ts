@@ -3,7 +3,7 @@
 // 파일: frontend/src/app/Map/components/CategoryHelper.ts
 // ============================================================================
 
-import { LocalSpot, CATEGORY_MAP_REVERSE } from '../lib/api';
+import { LocalSpot, CATEGORY_MAP_REVERSE } from '../../lib/api';
 
 /**
  * 카테고리별 아이콘 매핑 (undefined 값도 처리)

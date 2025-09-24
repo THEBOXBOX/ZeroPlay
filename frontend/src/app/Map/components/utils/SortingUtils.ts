@@ -1,6 +1,6 @@
-import { LocalSpot } from '../lib/api';
-import { SortOption } from './SortDropdown';
-import { hasLocalDeal } from './LocalDealsData';
+import { LocalSpot } from '../../lib/api';
+import { SortOption } from '../UI/SortDropdown';
+import { hasLocalDeal } from '../localdeals/LocalDealsData';
 
 /**
  * 거리 계산 함수 (Haversine formula)
