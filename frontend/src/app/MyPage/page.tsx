@@ -1,4 +1,4 @@
-// frontend/src/app/mypage/page.tsx (모바일 통일 버전)
+// frontend/src/app/MyPage/page.tsx (지도 북마크 연동 수정 버전)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -11,7 +11,7 @@ import BottomNavBar from '../components/NavBar';
 // 탭 타입 정의
 type MyPageTab = 'ai-routes' | 'benefits' | 'map-places' | 'profile';
 
-// 북마크 데이터 타입 정의 (기존과 동일)
+// 북마크 데이터 타입 정의
 interface BookmarkedBenefit {
   id: number;
   title: string;
@@ -55,9 +55,25 @@ interface BookmarkedAIRoute {
   created_at: string;
 }
 
+// 🔥 임시 유저 ID 생성 함수
+const getTempUserId = (): string => {
+  if (typeof window === 'undefined') return '00000000-0000-4000-8000-000000000000';
+  
+  let userId = localStorage.getItem('temp_user_id');
+  if (!userId) {
+    userId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+    localStorage.setItem('temp_user_id', userId);
+  }
+  return userId;
+};
+
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState<MyPageTab>('ai-routes');
-  const [navActiveTab, setNavActiveTab] = useState('내 정보'); // 네비바용 상태
+  const [navActiveTab, setNavActiveTab] = useState('내 정보');
   const [sessionId, setSessionId] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
@@ -81,7 +97,47 @@ export default function MyPage() {
     loadAllBookmarks(currentSessionId);
   }, []);
 
-  // 기존 데이터 로딩 로직 (loadAllBookmarks, 각종 핸들러들) 유지
+  // 🔥 수정된 지도 북마크 로딩 함수
+  const loadMapBookmarks = async (): Promise<BookmarkedMapPlace[]> => {
+    try {
+      console.log('📡 지도 북마크 API 호출...');
+      
+      const userId = getTempUserId();
+      console.log('🆔 사용할 User ID:', userId);
+      
+      const response = await fetch(`http://localhost:3001/api/bookmarks?user_id=${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('📥 지도 북마크 API 응답 상태:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          console.log('ℹ️ 지도 북마크 없음 (404)');
+          return [];
+        }
+        throw new Error(`Map Bookmarks API Error: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 지도 북마크 API 응답 데이터:', result);
+
+      if (result.success && result.bookmarks) {
+        console.log('✅ 지도 북마크 파싱 성공:', result.bookmarks.length, '개');
+        return result.bookmarks;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('❌ 지도 북마크 로딩 실패:', error);
+      return [];
+    }
+  };
+
+  // 기존 데이터 로딩 로직
   const loadAllBookmarks = async (sessionId: string) => {
     setLoading(true);
     console.log('🔄 모든 북마크 데이터 로딩 시작...');
@@ -91,7 +147,7 @@ export default function MyPage() {
       const [aiRoutesResult, benefitsResult, mapPlacesResult] = await Promise.allSettled([
         loadAIRoutes(sessionId),
         loadBenefitBookmarks(),
-        loadMapBookmarks()
+        loadMapBookmarks() // 🔥 수정된 함수 사용
       ]);
 
       // AI 루트 북마크 처리
@@ -145,7 +201,7 @@ export default function MyPage() {
     }
   };
 
-  // 🔥 청년혜택 북마크 로딩 (팀원 API 사용)
+  // 청년혜택 북마크 로딩 (팀원 API 사용)
   const loadBenefitBookmarks = async (): Promise<BookmarkedBenefit[]> => {
     try {
       console.log('📡 청년혜택 북마크 API 호출...');
@@ -178,44 +234,6 @@ export default function MyPage() {
       return [];
     } catch (error) {
       console.error('청년혜택 북마크 로딩 실패:', error);
-      return [];
-    }
-  };
-
-  // 🔥 지도 북마크 로딩 (팀원 API 사용) 
-  const loadMapBookmarks = async (): Promise<BookmarkedMapPlace[]> => {
-    try {
-      console.log('📡 지도 북마크 API 호출...');
-      
-      const userId = localStorage.getItem('temp_user_id') || 'anonymous';
-      
-      const response = await fetch(`http://localhost:3001/api/bookmarks?user_id=${userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('📥 지도 북마크 API 응답 상태:', response.status);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          console.log('ℹ️ 지도 북마크 없음 (404)');
-          return [];
-        }
-        throw new Error(`Map Bookmarks API Error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log('📊 지도 북마크 API 응답 데이터:', result);
-
-      if (result.success && result.bookmarks) {
-        return result.bookmarks;
-      }
-
-      return [];
-    } catch (error) {
-      console.error('지도 북마크 로딩 실패:', error);
       return [];
     }
   };
@@ -280,18 +298,28 @@ export default function MyPage() {
     }
   };
 
+  // 🔥 수정된 지도 북마크 삭제 함수
   const handleDeleteMapBookmark = async (bookmarkId: string, itemType: 'spot' | 'deal', itemId: string) => {
     try {
-      const userId = localStorage.getItem('temp_user_id') || 'anonymous';
+      console.log('🗑️ 지도 북마크 삭제 시도:', { bookmarkId, itemType, itemId });
+      
+      const userId = getTempUserId();
       const params = itemType === 'spot' ? `spot_id=${itemId}` : `deal_id=${itemId}`;
       
       const response = await fetch(`http://localhost:3001/api/bookmarks?user_id=${userId}&${params}`, {
         method: 'DELETE'
       });
 
+      console.log('🗑️ 삭제 응답 상태:', response.status);
+
       if (response.ok) {
         setMapPlaces(prev => prev.filter(place => place.id !== bookmarkId));
         alert('✅ 지도 북마크가 삭제되었습니다.');
+        console.log('✅ 지도 북마크 삭제 성공');
+      } else {
+        const errorText = await response.text();
+        console.error('❌ 삭제 실패:', errorText);
+        throw new Error(`삭제 실패: ${response.status}`);
       }
     } catch (error) {
       console.error('지도 북마크 삭제 실패:', error);
@@ -300,7 +328,7 @@ export default function MyPage() {
   };
 
   return (
-    // 🔥 모바일 컨테이너 적용
+    // 기존 JSX 코드는 동일하게 유지...
     <div className="min-h-screen bg-gray-50 max-w-[393px] mx-auto">
       {/* 🔥 공통 헤더 */}
       <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
@@ -333,7 +361,7 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* 요약 통계 카드 - 모바일 최적화 */}
+        {/* 요약 통계 카드 */}
         <div className="px-4 py-4 bg-gray-50">
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-white rounded-lg shadow-sm border p-3">
@@ -545,7 +573,7 @@ function BenefitsTab({ benefits, onDelete }: { benefits: BookmarkedBenefit[]; on
               onClick={() => onDelete(benefit.id)}
               className="text-red-500 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50"
             >
-              🗑️ 삭제
+              🗑️삭제
             </button>
           </div>
         </div>
@@ -554,11 +582,13 @@ function BenefitsTab({ benefits, onDelete }: { benefits: BookmarkedBenefit[]; on
   );
 }
 
-// 🔥 지도 장소 탭 컴포넌트 (모바일 최적화)
+// 🔥 개선된 지도 장소 탭 컴포넌트
 function MapPlacesTab({ places, onDelete }: { 
   places: BookmarkedMapPlace[]; 
   onDelete: (bookmarkId: string, itemType: 'spot' | 'deal', itemId: string) => void 
 }) {
+  console.log('🗺️ MapPlacesTab 렌더링:', places);
+  
   if (places.length === 0) {
     return (
       <div className="text-center py-12">
@@ -590,35 +620,43 @@ function MapPlacesTab({ places, onDelete }: {
               {place.local_spots?.address && (
                 <p className="text-sm text-gray-600 mb-2">{place.local_spots.address}</p>
               )}
+              {/* 🔥 추가 정보 표시 */}
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                <span>📅 {new Date(place.created_at).toLocaleDateString()}</span>
+                {place.local_spots?.category && (
+                  <span>🏷️ {place.local_spots.category}</span>
+                )}
+                {place.local_spots?.rating && (
+                  <span>⭐ {place.local_spots.rating}</span>
+                )}
+              </div>
             </div>
-            <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">
-              {place.bookmark_type === 'spot' ? '장소' : '딜'}
-            </span>
-          </div>
-          
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex gap-3 text-gray-600">
-              {place.local_spots?.category && (
-                <span>🏷️ {place.local_spots.category}</span>
-              )}
-              {place.local_spots?.rating && (
-                <span>⭐ {place.local_spots.rating}</span>
-              )}
-              <span>📅 {new Date(place.created_at).toLocaleDateString()}</span>
+            <div className="flex flex-col items-end">
+              <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full mb-2">
+                {place.bookmark_type === 'spot' ? '장소' : '딜'}
+              </span>
+              <button 
+                onClick={() => onDelete(
+                  place.id, 
+                  place.bookmark_type, 
+                  place.spot_id || place.deal_id || ''
+                )}
+                className="text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 text-xs"
+              >
+                🗑️ 삭제
+              </button>
             </div>
-            <button 
-              onClick={() => onDelete(
-                place.id, 
-                place.bookmark_type, 
-                place.spot_id || place.deal_id || ''
-              )}
-              className="text-red-500 hover:text-red-700 px-3 py-1 rounded hover:bg-red-50"
-            >
-              🗑️ 삭제
-            </button>
           </div>
         </div>
       ))}
+      
+      {/* 🔥 디버그 정보 (개발용) */}
+      <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-600">
+        <strong>디버그 정보:</strong><br/>
+        총 {places.length}개 북마크<br/>
+        User ID: {getTempUserId().slice(0, 8)}...<br/>
+        API 엔드포인트: /api/bookmarks
+      </div>
     </div>
   );
 }
@@ -662,6 +700,12 @@ function ProfileTab({ sessionId }: { sessionId: string }) {
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">계정 타입</span>
             <span className="text-gray-800">브라우저 세션</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">지도 User ID</span>
+            <span className="text-xs font-mono text-gray-800">
+              {getTempUserId().slice(0, 8)}...
+            </span>
           </div>
         </div>
       </div>

@@ -1,3 +1,4 @@
+// frontend/src/app/AI-route/page.tsx (수정된 버전)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -89,7 +90,7 @@ export default function AIRoutePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 max-w-[393px] mx-auto relative">
-      {/* 공통 헤더 */}
+      {/* 🔥 공통 헤더 */}
       <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
         <Header 
           title="mySUBWAY"
@@ -100,14 +101,14 @@ export default function AIRoutePage() {
         />
       </div>
 
-      {/* 메인 콘텐츠 - 🔥 두 네비게이션 바 모두 고려한 여백 */}
+      {/* 🔥 메인 콘텐츠 - 정확한 높이 계산 */}
       <div 
         className="bg-white flex flex-col"
         style={{ 
-          marginTop: '60px', 
-          // 🔥 하단 여백: AI 네비(60px) + 공통 네비(80px) = 140px
-          marginBottom: '140px',
-          minHeight: 'calc(100vh - 200px)',
+          marginTop: '60px',
+          // 🔥 수정: AI 네비(60px) + 공통 네비(60px) = 120px로 수정
+          marginBottom: '120px',
+          minHeight: 'calc(100vh - 180px)',
           maxWidth: '393px'
         }}
       >
@@ -126,12 +127,12 @@ export default function AIRoutePage() {
           </div>
         </div>
 
-        {/* 메인 콘텐츠 영역 - 🔥 정확한 높이 계산 */}
+        {/* 🔥 메인 콘텐츠 영역 - 높이 재계산 */}
         <div 
           className="flex-1 overflow-hidden bg-gray-50"
           style={{ 
-            // 🔥 전체화면 - 헤더(60px) - AI헤더(약60px) - 두 네비바(140px) = 계산된 높이
-            height: 'calc(100vh - 260px)'
+            // 🔥 수정: 전체화면 - 헤더(60px) - AI헤더(60px) - 두 네비바(120px) = 정확한 높이
+            height: 'calc(100vh - 240px)'
           }}
         >
           
@@ -190,7 +191,7 @@ export default function AIRoutePage() {
                 </div>
               </div>
               
-              {/* 🔥 overflow-hidden 제거하고 relative 추가 */}
+              {/* 🔥 ChatBot 컴포넌트에 적절한 높이 제공 */}
               <div className="flex-1 relative">
                 <ChatBot 
                   onRouteGenerated={handleRouteGenerated} 
@@ -254,8 +255,8 @@ export default function AIRoutePage() {
         </div>
       </div>
 
-      {/* 🔥 AI 루트 전용 네비게이션 - 공통 네비 위에 위치 */}
-      <div className="fixed bottom-[80px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-40 bg-white">
+      {/* 🔥 AI 루트 전용 네비게이션 - 공통 네비 위에 위치, 높이 60px로 통일 */}
+      <div className="fixed bottom-[60px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-40 bg-white">
         <div className="h-[60px] border-t">
           <BottomNavigation
             activeTab={activeTab}
@@ -266,7 +267,7 @@ export default function AIRoutePage() {
         </div>
       </div>
 
-      {/* 🔥 공통 하단 네비게이션 - 최하단 위치 */}
+      {/* 🔥 공통 하단 네비게이션 - 최하단 위치, 높이 60px로 통일 */}
       <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
         <BottomNavBar
           activeTab={navActiveTab}

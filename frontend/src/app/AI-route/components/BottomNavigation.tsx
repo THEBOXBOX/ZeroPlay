@@ -1,3 +1,4 @@
+// frontend/src/app/AI-route/components/BottomNavigation.tsx (높이 조정 버전)
 'use client';
 
 type MobileTab = 'chat' | 'filters' | 'results';
@@ -42,14 +43,15 @@ export default function BottomNavigation({
   ];
 
   return (
-    <div className="bg-white border-t border-gray-200 px-2 py-2 flex-shrink-0 safe-area-bottom">
-      <div className="flex justify-around">
+    // 🔥 높이를 60px로 통일하고 패딩 조정
+    <div className="bg-white border-t border-gray-200 px-2 py-1 flex-shrink-0 h-[60px]">
+      <div className="flex justify-around h-full items-center">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             disabled={tab.disabled}
-            className={`flex flex-col items-center py-2 px-3 rounded-xl transition-all duration-200 min-w-0 flex-1 mx-1 relative ${
+            className={`flex flex-col items-center py-1 px-2 rounded-xl transition-all duration-200 min-w-0 flex-1 mx-1 relative ${
               activeTab === tab.id
                 ? tab.activeColor + ' shadow-sm'
                 : tab.disabled
@@ -57,12 +59,14 @@ export default function BottomNavigation({
                 : 'text-gray-500 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
-            <span className="text-lg mb-1">{tab.icon}</span>
+            {/* 🔥 아이콘 크기 조정 */}
+            <span className="text-base mb-0.5">{tab.icon}</span>
+            {/* 🔥 텍스트 크기 조정 */}
             <span className="text-xs font-medium leading-tight text-center">{tab.label}</span>
             
-            {/* 배지 */}
+            {/* 배지 - 위치 조정 */}
             {tab.badge !== undefined && tab.badge > 0 && (
-              <span className={`absolute -top-1 -right-1 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold shadow-sm ${
+              <span className={`absolute -top-0.5 -right-0.5 text-white text-xs rounded-full min-w-[16px] h-[16px] flex items-center justify-center px-1 text-[10px] font-bold shadow-sm ${
                 tab.id === 'filters' ? 'bg-red-500' : 'bg-green-500'
               }`}>
                 {tab.badge > 99 ? '99+' : tab.badge}
