@@ -17,8 +17,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({
-  title = "mySUBWAY",
-  logoSrc = "/logo.png", // 기본값으로 logo.png 설정
+  title = "ZeroPlay",
+  logoSrc = "/logo.svg", // 기본값으로 logo.png 설정
   showSearch = true,
   showNotification = true,
   showSettings = true,

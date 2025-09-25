@@ -37,7 +37,7 @@ export default function LocalDealsSection({
   return (
     <section className="py-6 px-4">
       <div className="mb-4 flex items-center">
-        <span className="text-orange-500 mr-2">🔥</span>
+        <span className="text-orange-500 mr-2"></span>
         <h2 className="text-lg font-bold text-gray-800">{title}</h2>
       </div>
       
