@@ -73,6 +73,7 @@ const HomePage = () => {
                 src={banner.image}
                 alt={banner.title}
                 fill
+                sizes="393px" 
                 style={{
                   objectFit: 'cover'
                 }}

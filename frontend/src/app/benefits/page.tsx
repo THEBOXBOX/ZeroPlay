@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import Header from '@/app/components/Header';
-import NavBar from '@/app/components/NavBar';
+import Header from '../components/Header';
+import NavBar from '../components/NavBar';
 import CategoryTabs from '@/app/benefits/components/CategoryTabs';
 import BenefitCard from '@/app/benefits/components/BenefitCard';
 
