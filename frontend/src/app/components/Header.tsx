@@ -29,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <div 
-      className={`bg-white py-2 flex items-center justify-between border-b border-gray-100 h-[70px] ${className}`}
+      className={`bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 h-[70px] ${className}`}
     >
       {/* 로고 영역 */}
       <div className="flex items-center">
@@ -40,7 +40,6 @@ const Header: React.FC<HeaderProps> = ({
           height={128}
           className="h-10 w-auto"
           priority
-          quality={100}
           style={{ objectFit: 'contain' }}
         />
       </div>

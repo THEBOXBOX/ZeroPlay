@@ -110,7 +110,8 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-20 flex items-center justify-center">
+      <div className="w-[393px] min-h-[852px] bg-white flex flex-col relative shadow-lg">
       {/* 공통 헤더 컴포넌트 */}
       <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
         <Header 
@@ -172,6 +173,7 @@ const HomePage = () => {
           onTabChange={setActiveTab}
         />
       </div>
+    </div>
     </div>
   );
 };
