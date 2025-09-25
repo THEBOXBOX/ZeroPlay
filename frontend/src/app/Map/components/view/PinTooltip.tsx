@@ -3,11 +3,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Navigation, Tag, X } from 'lucide-react';
-import CategoryFilter from './CategoryFilter';
-import BottomSheet from './BottomSheet';
+import CategoryFilter from '../filters/CategoryFilter';
+import BottomSheet from '../UI/BottomSheet';
 import KakaoMap from './KakaoMap';
-import { LocalSpot, CATEGORY_NAMES } from '../lib/api';
-import { useLocalSpots } from '../hooks/useLocalSpots';
+import { LocalSpot, CATEGORY_NAMES } from '../../lib/api';
+import { useLocalSpots } from '../../hooks/useLocalSpots';
 
 const MapView = () => {
   const [activeCategory, setActiveCategory] = useState('전체');

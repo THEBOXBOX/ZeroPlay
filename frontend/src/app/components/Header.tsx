@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Search, Bell, Settings } from 'lucide-react';
+import Image from 'next/image';
 
 interface HeaderProps {
   title?: string;
@@ -16,8 +17,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({
-  title = "mySUBWAY",
-  logoSrc,
+  title = "ZeroPlay",
+  logoSrc = "/logo.svg", // 기본값으로 logo.png 설정
   showSearch = true,
   showNotification = true,
   showSettings = true,
@@ -28,24 +29,19 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <div 
-      className={`bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 ${className}`}
+      className={`bg-white px-4 py-2 flex items-center justify-between border-b border-gray-100 h-[70px] ${className}`}
     >
       {/* 로고 영역 */}
       <div className="flex items-center">
-        {logoSrc ? (
-          <img 
-            src={logoSrc} 
-            alt={title}
-            className="h-8 w-auto" // 로고 이미지 크기
-          />
-        ) : (
-          // 임시 텍스트 로고 (mySUBWAY 스타일)
-          <div className="flex items-center bg-gray-100 px-2 py-1 rounded-lg">
-            <span className="text-black font-bold text-sm">my</span>
-            <span className="text-orange-500 font-bold text-sm">SUBWAY</span>
-            <span className="text-xs text-gray-500 ml-1">(임시로고)</span>
-          </div>
-        )}
+        <Image
+          src={logoSrc}
+          alt={title}
+          width={128}
+          height={128}
+          className="h-10 w-auto"
+          priority
+          style={{ objectFit: 'contain' }}
+        />
       </div>
       
       {/* 액션 버튼들 */}

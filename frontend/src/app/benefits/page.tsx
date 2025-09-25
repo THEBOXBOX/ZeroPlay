@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import Header from '@/app/benefits/components/Header';
-import NavBar from '@/app/benefits/components/NavBar';
+import Header from '../components/Header';
+import NavBar from '../components/NavBar';
 import CategoryTabs from '@/app/benefits/components/CategoryTabs';
 import BenefitCard from '@/app/benefits/components/BenefitCard';
 
@@ -230,14 +230,18 @@ const YouthBenefitsPage: React.FC = () => {
 
   return (
     <>
-      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '393px', height: '60px', zIndex: 1000 }}>
+      {/* 헤더 - 상단 고정 */}
+      <div style={{ position: 'fixed', top: 0, left: '50%', transform: 'translateX(-50%)', width: '393px', height: '70px', zIndex: 1000, background: 'white' }}>
         <Header />
       </div>
 
-      <div style={{ position: 'fixed', top: '60px', left: '50%', transform: 'translateX(-50%)', width: '393px', height: '50px', zIndex: 999, background: 'white', borderBottom: '1px solid #e5e7eb' }}>
+      {/* 카테고리 탭 - 고정 위치 */}
+      <div style={{ position: 'fixed', top: '70px', left: '50%', transform: 'translateX(-50%)', width: '393px', height: '50px', zIndex: 999, background: 'white', borderBottom: '1px solid #e5e7eb' }}>
         <CategoryTabs activeTab={activeTab} onTabChange={handleTabChange} />
       </div>
-      <div style={{ position: 'fixed', top: '110px', left: '50%', transform: 'translateX(-50%)', width: '393px', height: '60px', zIndex: 998, background: 'white', borderBottom: '1px solid #e5e7eb' }}>
+
+      {/* 지역 선택 드롭다운 - 고정 위치 */}
+      <div style={{ position: 'fixed', top: '120px', left: '50%', transform: 'translateX(-50%)', width: '393px', height: '60px', zIndex: 998, background: 'white', borderBottom: '1px solid #e5e7eb' }}>
         <div className="px-4 py-3 flex justify-center">
           <div className="relative w-full max-w-sm">
             <button
@@ -275,48 +279,48 @@ const YouthBenefitsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mobile-container bg-gray-50 flex flex-col h-screen">
-        <div className="h-[170px]"></div>
-        
-        <div 
-          className="overflow-y-auto" 
-          style={{
-            height: isSafariMobile ? 'calc(100vh - 350px)' : 'calc(100vh - 230px)',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'none',
-            paddingBottom: '0px'
-          }}
-        >
-          <div className="px-4 py-6 space-y-3">
-            {currentPrograms.map((program) => (
-              <BenefitCard key={program.id} program={program} />
-            ))}
+      {/* 메인 컨텐츠 영역 - 네비바까지 꽉 채움 */}
+      <div 
+        className="overflow-y-auto bg-gray-50" 
+        style={{ 
+          position: 'fixed',
+          top: '180px',
+          bottom: '70px', 
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '393px'
+        }}
+      >
+        <div className="px-4 py-6 space-y-3">
+          {currentPrograms.map((program) => (
+            <BenefitCard key={program.id} program={program} />
+          ))}
 
-            {currentPrograms.length === 0 && !loading && (
-              <div className="text-center py-20">
-                <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <span className="text-3xl">🔍</span>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">혜택이 없습니다</h3>
-                <p className="text-gray-500 text-sm mb-4">
-                  <strong>{selectedRegion}</strong>에서 이용 가능한 <strong>{activeTab === '전체' ? '전체' : activeTab}</strong> 프로그램이 없습니다.
-                </p>
-                <button
-                  onClick={() => {
-                    setSelectedRegion('전체');
-                    setActiveTab('전체');
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  전체 혜택 보기
-                </button>
+          {currentPrograms.length === 0 && !loading && (
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                <span className="text-3xl">🔍</span>
               </div>
-            )}
-          </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">혜택이 없습니다</h3>
+              <p className="text-gray-500 text-sm mb-4">
+                <strong>{selectedRegion}</strong>에서 이용 가능한 <strong>{activeTab === '전체' ? '전체' : activeTab}</strong> 프로그램이 없습니다.
+              </p>
+              <button
+                onClick={() => {
+                  setSelectedRegion('전체');
+                  setActiveTab('전체');
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                전체 혜택 보기
+              </button>
+            </div>
+          )}
         </div>
       </div>
       
-      <div style={{ position: 'fixed', bottom: '10px', left: '50%', transform: 'translateX(-50%)', width: '393px', height: '80px', zIndex: 1000 }}>
+      {/* 네비바 - 기존 위치에 그대로 고정 */}
+      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '393px', height: '70px', zIndex: 1000 }}>
         <NavBar />
       </div>
     </>

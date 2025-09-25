@@ -3,8 +3,8 @@
 
 import React from 'react';
 import MapView from './MapView';
-import Header from '../../components/Header'; // 공통 헤더 import
-import BottomNavBar from '../../components/NavBar'; // 공통 네비바 import
+import Header from '../../../components/Header'; // 공통 헤더 import
+import BottomNavBar from '../../../components/NavBar'; // 공통 네비바 import
 import { Bell, Settings, Search, Home, Route, Gift, MapPin, User } from 'lucide-react';
 
 export default function ClientMapPage({ appKey }: { appKey: string }) {
@@ -44,7 +44,7 @@ export default function ClientMapPage({ appKey }: { appKey: string }) {
       {/* 헤더 */}
       <div className="flex-shrink-0">
         <Header 
-          title="mySUBWAY"
+          title="ZeroPlay"
           onSearchClick={() => console.log('검색 클릭')}
           onNotificationClick={() => console.log('알림 클릭')}
           onSettingsClick={() => console.log('설정 클릭')}
