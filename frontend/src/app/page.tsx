@@ -125,7 +125,7 @@ const HomePage = () => {
 
       {/* Main Content */}
       <div 
-        className="max-w-[393px] mx-auto bg-gray-50"
+        className="max-w-[393px] mx-auto bg-white"
         style={{ 
           marginTop: '70px',
           minHeight: 'calc(100vh - 160px)'
