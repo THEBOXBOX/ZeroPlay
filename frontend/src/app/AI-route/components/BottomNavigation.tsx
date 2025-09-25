@@ -20,7 +20,7 @@ export default function BottomNavigation({
     {
       id: 'filters' as MobileTab,
       icon: '⚙️',
-      label: '여행 조건',
+      label: '필터',
       activeColor: 'bg-indigo-50 text-indigo-600',
       disabled: false,
       badge: activeFiltersCount
@@ -28,14 +28,14 @@ export default function BottomNavigation({
     {
       id: 'chat' as MobileTab,
       icon: '💬',
-      label: 'AI 추천',
+      label: '챗봇',
       activeColor: 'bg-blue-50 text-blue-600',
       disabled: false
     },
     {
       id: 'results' as MobileTab,
       icon: '🗺️',
-      label: '추천 결과',
+      label: '추천 코스',
       activeColor: 'bg-green-50 text-green-600',
       disabled: resultsCount === 0,
       badge: resultsCount
