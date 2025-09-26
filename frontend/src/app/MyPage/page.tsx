@@ -1,4 +1,3 @@
-// frontend/src/app/MyPage/page.tsx (지도 북마크 연동 수정 버전)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -97,7 +96,25 @@ export default function MyPage() {
     loadAllBookmarks(currentSessionId);
   }, []);
 
-  // 🔥 수정된 지도 북마크 로딩 함수
+  // 🔥 첫 번째 파일의 실시간 동기화 유지
+  useEffect(() => {
+    // 지도에서 북마크 변경 시 마이페이지 업데이트
+    const handleMapBookmarkChange = (event: CustomEvent) => {
+      console.log('🔄 지도 북마크 변경 감지:', event.detail);
+      
+      // 북마크 목록 새로고침
+      loadAllBookmarks(sessionId);
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('mapBookmarkChanged', handleMapBookmarkChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('mapBookmarkChanged', handleMapBookmarkChange as EventListener);
+    };
+  }, [sessionId]);
+
+  // 🔥 첫 번째 파일의 상대경로 API 사용 유지
   const loadMapBookmarks = async (): Promise<BookmarkedMapPlace[]> => {
     try {
       console.log('📡 지도 북마크 API 호출...');
@@ -105,7 +122,8 @@ export default function MyPage() {
       const userId = getTempUserId();
       console.log('🆔 사용할 User ID:', userId);
       
-      const response = await fetch(`http://localhost:3001/api/bookmarks?user_id=${userId}`, {
+      // 🔥 첫 번째 파일의 상대경로 사용
+      const response = await fetch(`/api/bookmarks?user_id=${userId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -147,7 +165,7 @@ export default function MyPage() {
       const [aiRoutesResult, benefitsResult, mapPlacesResult] = await Promise.allSettled([
         loadAIRoutes(sessionId),
         loadBenefitBookmarks(),
-        loadMapBookmarks() // 🔥 수정된 함수 사용
+        loadMapBookmarks() // 🔥 첫 번째 파일의 함수 사용
       ]);
 
       // AI 루트 북마크 처리
@@ -298,7 +316,7 @@ export default function MyPage() {
     }
   };
 
-  // 🔥 수정된 지도 북마크 삭제 함수
+  // 🔥 첫 번째 파일의 상대경로 삭제 API 사용 유지
   const handleDeleteMapBookmark = async (bookmarkId: string, itemType: 'spot' | 'deal', itemId: string) => {
     try {
       console.log('🗑️ 지도 북마크 삭제 시도:', { bookmarkId, itemType, itemId });
@@ -306,7 +324,8 @@ export default function MyPage() {
       const userId = getTempUserId();
       const params = itemType === 'spot' ? `spot_id=${itemId}` : `deal_id=${itemId}`;
       
-      const response = await fetch(`http://localhost:3001/api/bookmarks?user_id=${userId}&${params}`, {
+      // 🔥 첫 번째 파일의 상대경로 사용
+      const response = await fetch(`/api/bookmarks?user_id=${userId}&${params}`, {
         method: 'DELETE'
       });
 
@@ -328,7 +347,6 @@ export default function MyPage() {
   };
 
   return (
-    // 기존 JSX 코드는 동일하게 유지...
     <div className="min-h-screen bg-gray-50 max-w-[393px] mx-auto">
       {/* 🔥 공통 헤더 */}
       <div className="fixed top-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
@@ -341,12 +359,14 @@ export default function MyPage() {
         />
       </div>
 
-      {/* 메인 콘텐츠 */}
+      {/* 🔥 메인 콘텐츠 - 두 번째 파일의 개선된 여백 적용 */}
       <div 
         className="bg-white flex flex-col"
         style={{ 
           marginTop: '60px', 
-          minHeight: 'calc(100vh - 140px)',
+          // 🔥 두 번째 파일의 개선사항: 공통 네비바 높이를 70px로 맞춤
+          marginBottom: '70px',
+          minHeight: 'calc(100vh - 130px)',
           maxWidth: '393px'
         }}
       >
@@ -427,10 +447,13 @@ export default function MyPage() {
           </div>
         </div>
 
-        {/* 탭 콘텐츠 - 스크롤 가능 영역 */}
+        {/* 🔥 탭 콘텐츠 - 두 번째 파일의 개선된 스크롤 영역 적용 */}
         <div 
           className="flex-1 overflow-auto px-4 py-4"
-          style={{ height: 'calc(100vh - 300px)' }}
+          style={{ 
+            height: 'calc(100vh - 330px)', // 🔥 두 번째 파일의 높이를 더 넉넉하게 조정
+            paddingBottom: '20px' // 🔥 두 번째 파일의 하단 패딩 추가
+          }}
         >
           {loading ? (
             <div className="text-center py-12">
@@ -481,7 +504,7 @@ function AIRoutesTab({ routes, onDelete }: { routes: BookmarkedAIRoute[]; onDele
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-6"> {/* 🔥 두 번째 파일의 pb-6 추가 */}
       {routes.map((route) => (
         <div key={route.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <div className="flex items-start justify-between mb-3">
@@ -538,7 +561,7 @@ function BenefitsTab({ benefits, onDelete }: { benefits: BookmarkedBenefit[]; on
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-6"> {/* 🔥 두 번째 파일의 pb-6 추가 */}
       {benefits.map((benefit) => (
         <div key={benefit.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <div className="flex items-start justify-between mb-3">
@@ -609,7 +632,7 @@ function MapPlacesTab({ places, onDelete }: {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-6"> {/* 🔥 두 번째 파일의 pb-6 추가 */}
       {places.map((place) => (
         <div key={place.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
           <div className="flex items-start justify-between mb-3">
@@ -650,13 +673,7 @@ function MapPlacesTab({ places, onDelete }: {
         </div>
       ))}
       
-      {/* 🔥 디버그 정보 (개발용) */}
-      <div className="bg-gray-100 rounded-lg p-3 text-xs text-gray-600">
-        <strong>디버그 정보:</strong><br/>
-        총 {places.length}개 북마크<br/>
-        User ID: {getTempUserId().slice(0, 8)}...<br/>
-        API 엔드포인트: /api/bookmarks
-      </div>
+      {/* 🔥 첫 번째 파일의 디버그 정보 제거 (두 번째 파일에서는 제거됨) */}
     </div>
   );
 }
@@ -684,7 +701,7 @@ function ProfileTab({ sessionId }: { sessionId: string }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-6"> {/* 🔥 두 번째 파일의 pb-6 추가 */}
       <div className="bg-white rounded-xl p-4 border border-gray-200">
         <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center">
           <Calendar className="w-4 h-4 mr-2" />
