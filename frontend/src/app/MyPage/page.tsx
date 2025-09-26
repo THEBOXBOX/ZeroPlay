@@ -371,7 +371,7 @@ export default function MyPage() {
         }}
       >
         {/* 마이페이지 헤더 */}
-        <div className="bg-white border-b border-gray-100 px-4 py-3">
+        <div className="bg-white border-b border-gray-100 px-3 py-5">
           <div className="flex items-center">
             <Heart className="w-6 h-6 text-red-500 mr-3" />
             <div>
@@ -384,7 +384,7 @@ export default function MyPage() {
         {/* 요약 통계 카드 */}
         <div className="px-4 py-4 bg-gray-50">
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white rounded-lg shadow-sm border p-3">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-500">전체 북마크</p>
@@ -394,7 +394,7 @@ export default function MyPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-lg shadow-sm border p-3">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-gray-500">예상 총 예산</p>
@@ -735,7 +735,7 @@ function ProfileTab({ sessionId }: { sessionId: string }) {
         <div className="space-y-3">
           <button 
             onClick={handleRefreshData}
-            className="w-full text-left px-3 py-2 rounded-lg border hover:bg-blue-50 transition-colors flex items-center text-sm"
+            className="w-full text-left px-3 py-2 rounded-lg border border-gray-200 hover:bg-blue-50 transition-colors flex items-center text-sm"
           >
             <span className="mr-3">🔄</span>
             <div>
@@ -746,7 +746,7 @@ function ProfileTab({ sessionId }: { sessionId: string }) {
           
           <button 
             onClick={handleClearAllData}
-            className="w-full text-left px-3 py-2 rounded-lg border hover:bg-red-50 text-red-600 transition-colors flex items-center text-sm"
+            className="w-full text-left px-3 py-2 rounded-lg border-1 hover:bg-red-50 text-red-600 transition-colors flex items-center text-sm"
           >
             <span className="mr-3">🗑️</span>
             <div>

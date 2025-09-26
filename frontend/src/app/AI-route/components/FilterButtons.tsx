@@ -95,7 +95,7 @@ export default function FilterButtons({ filters, onFilterChange }: FilterButtons
   );
 
   return (
-    <div className="space-y-5 p-3">
+    <div className="space-y-10 p-3">
       
       {/* 초기화 버튼 */}
       {hasActiveFilters && (

@@ -300,7 +300,7 @@ export default function RouteResults({
         const actualTotalBudget = calculateTotalBudget(route.places);
 
         return (
-          <div key={route.id} className="bg-white rounded-2xl shadow-md border overflow-hidden hover:shadow-lg transition-shadow">
+          <div key={route.id} className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
             
             {/* 카드 헤더 */}
             <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white p-4">
@@ -383,7 +383,7 @@ export default function RouteResults({
               
               <div className="grid grid-cols-1 gap-2 mb-3">
                 {route.places.slice(0, 3).map((place, index) => (
-                  <div key={place.id} className="flex items-center gap-3 bg-white p-2 rounded-lg border">
+                  <div key={place.id} className="flex items-center gap-3 bg-white p-2 rounded-lg border border-gray-200">
                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                       <span className="text-sm">{getPlaceIcon(place.type)}</span>
                     </div>
@@ -417,7 +417,7 @@ export default function RouteResults({
             </div>
 
             {/* 펼치기/접기 버튼 */}
-            <div className="border-t bg-white">
+            <div className="border border-gray-200 bg-white">
               <button
                 onClick={() => toggleRouteExpansion(route.id)}
                 className="w-full p-3 text-center hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
@@ -433,7 +433,7 @@ export default function RouteResults({
 
             {/* 상세 정보 */}
             {isExpanded && (
-              <div className="border-t bg-white">
+              <div className="border border-gray-200 bg-white">
                 <div className="p-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between mb-3">
@@ -451,7 +451,7 @@ export default function RouteResults({
                     </div>
                     
                     {route.places.map((place, index) => (
-                      <div key={place.id} className="flex gap-3 p-3 bg-gray-50 rounded-xl border">
+                      <div key={place.id} className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
                         <div className="flex-shrink-0">
                           <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center relative">
                             <span className="text-base">{getPlaceIcon(place.type)}</span>
@@ -468,7 +468,7 @@ export default function RouteResults({
                             <div className="flex-1">
                               <h4 className="font-bold text-gray-800 text-sm mb-1">{place.name}</h4>
                               <div className="flex items-center gap-2 mb-2">
-                                <span className="bg-white px-2 py-0.5 rounded text-xs text-gray-600 border font-medium">
+                                <span className="bg-white px-2 py-0.5 rounded text-xs text-gray-600 border border-gray-200 font-medium">
                                   {getPlaceTypeText(place.type)}
                                 </span>
                                 <span className="text-xs text-gray-500">
@@ -504,7 +504,7 @@ export default function RouteResults({
             )}
 
             {/* 하단 액션 영역 */}
-            <div className="bg-white border-t p-4">
+            <div className="bg-white border border-gray-200 p-4">
               <div className="space-y-3">
                 {/* 메인 액션 버튼 */}
                 <button 

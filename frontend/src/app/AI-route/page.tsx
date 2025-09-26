@@ -140,7 +140,7 @@ export default function AIRoutePage() {
             <div className="h-full overflow-auto">
               <div className="p-4 space-y-4 pb-6">
                 
-                <div className="bg-white rounded-2xl shadow-sm p-4 border">
+                <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <h2 className="text-lg font-bold text-gray-900 flex items-center">
                       <span className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center mr-2 text-sm">
@@ -159,7 +159,7 @@ export default function AIRoutePage() {
                   </p>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border">
+                <div className="bg-white px-3 py-3 rounded-2xl shadow-sm border border-gray-200">
                   <FilterButtons 
                     filters={filters} 
                     onFilterChange={handleFilterChange}
@@ -167,7 +167,7 @@ export default function AIRoutePage() {
                 </div>
 
                 {activeFiltersCount > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm p-4 border">
+                  <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
                     <button
                       onClick={() => setActiveTab('chat')}
                       className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 px-4 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all transform active:scale-95"
@@ -183,7 +183,7 @@ export default function AIRoutePage() {
           {/* 채팅 탭 */}
           {activeTab === 'chat' && (
             <div className="h-full bg-white flex flex-col">
-              <div className="bg-blue-50 px-4 py-2 border-b">
+              <div className="bg-blue-50 px-4 py-2">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                   <span className="text-sm font-medium text-blue-700">AI 여행 추천</span>
@@ -207,7 +207,7 @@ export default function AIRoutePage() {
                 {currentRoutes.length > 0 ? (
                   <div className="space-y-4">
                     
-                    <div className="bg-white rounded-2xl shadow-sm p-4 border">
+                    <div className="bg-white rounded-2xl shadow-sm p-4 border border-gray-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center">
                           <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
@@ -232,7 +232,7 @@ export default function AIRoutePage() {
                     <RouteResults routes={currentRoutes} />
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl shadow-sm p-8 text-center border">
+                  <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-gray-200">
                     <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
                       <span className="text-3xl text-gray-400">🗺️</span>
                     </div>
@@ -256,7 +256,7 @@ export default function AIRoutePage() {
 
       {/* 🔥 AI 루트 전용 네비게이션 - 공통 네비 위에 위치, 높이 60px */}
       <div className="fixed bottom-[70px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-40 bg-white">
-        <div className="h-[60px] border-t">
+        <div className="h-[60px]">
           <BottomNavigation
             activeTab={activeTab}
             onTabChange={setActiveTab}

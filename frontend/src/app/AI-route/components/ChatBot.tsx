@@ -217,7 +217,7 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
               className={`max-w-[75%] px-4 py-3 rounded-2xl ${
                 message.type === 'user'
                   ? 'bg-blue-500 text-white rounded-br-md shadow-md'
-                  : 'bg-gray-100 text-gray-800 rounded-bl-md border'
+                  : 'bg-gray-100 text-gray-800 rounded-bl-md'
               }`}
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -247,7 +247,7 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
             <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
               <span className="text-white text-sm">🤖</span>
             </div>
-            <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md border">
+            <div className="bg-gray-100 px-4 py-3 rounded-2xl rounded-bl-md border border-gray-200">
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
@@ -261,7 +261,7 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
       </div>
 
       {/* 🔥 입력 영역 - 더 아래로 고정 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white px-4 py-4 border-t">
+      <div className="absolute bottom-0 left-0 right-0 bg-white px-4 py-4 border-t border-gray-200">
         <div className="bg-gray-100 rounded-2xl p-2 flex items-center gap-3">
           <input
             ref={inputRef}
