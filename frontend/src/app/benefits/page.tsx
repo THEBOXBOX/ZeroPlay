@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
-import NavBar from '../components/NavBar';
+import BottomNavBar from '../components/NavBar';
 import CategoryTabs from '@/app/benefits/components/CategoryTabs';
 import BenefitCard from '@/app/benefits/components/BenefitCard';
 
@@ -32,6 +32,8 @@ const YouthBenefitsPage: React.FC = () => {
   const [programs, setPrograms] = useState<BenefitProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [NavActiveTab, setNavActiveTab] = useState('혜택 정보');
 
   // 탭별로 다른 지역 옵션 반환
   const getRegionOptions = () => {
@@ -321,7 +323,10 @@ const YouthBenefitsPage: React.FC = () => {
       
       {/* 네비바 - 기존 위치에 그대로 고정 */}
       <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '393px', height: '70px', zIndex: 1000 }}>
-        <NavBar />
+        <BottomNavBar 
+          activeTab={NavActiveTab}
+          onTabChange={setNavActiveTab}
+        />
       </div>
     </>
   );
