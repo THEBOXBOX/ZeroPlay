@@ -1,4 +1,3 @@
-// frontend/src/app/AI-route/page.tsx (수정된 버전)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -106,9 +105,9 @@ export default function AIRoutePage() {
         className="bg-white flex flex-col"
         style={{ 
           marginTop: '60px',
-          // 🔥 수정: AI 네비(60px) + 공통 네비(60px) = 120px로 수정
-          marginBottom: '120px',
-          minHeight: 'calc(100vh - 180px)',
+          // 🔥 수정: AI 네비(60px) + 공통 네비(70px) = 130px
+          marginBottom: '130px',
+          minHeight: 'calc(100vh - 190px)',
           maxWidth: '393px'
         }}
       >
@@ -131,8 +130,8 @@ export default function AIRoutePage() {
         <div 
           className="flex-1 overflow-hidden bg-gray-50"
           style={{ 
-            // 🔥 수정: 전체화면 - 헤더(60px) - AI헤더(60px) - 두 네비바(120px) = 정확한 높이
-            height: 'calc(100vh - 240px)'
+            // 🔥 수정: 전체화면 - 헤더(60px) - AI헤더(60px) - 두 네비바(130px) = 정확한 높이
+            height: 'calc(100vh - 250px)'
           }}
         >
           
@@ -255,8 +254,8 @@ export default function AIRoutePage() {
         </div>
       </div>
 
-      {/* 🔥 AI 루트 전용 네비게이션 - 공통 네비 위에 위치, 높이 60px로 통일 */}
-      <div className="fixed bottom-[60px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-40 bg-white">
+      {/* 🔥 AI 루트 전용 네비게이션 - 공통 네비 위에 위치, 높이 60px */}
+      <div className="fixed bottom-[70px] left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-40 bg-white">
         <div className="h-[60px] border-t">
           <BottomNavigation
             activeTab={activeTab}
@@ -267,7 +266,7 @@ export default function AIRoutePage() {
         </div>
       </div>
 
-      {/* 🔥 공통 하단 네비게이션 - 최하단 위치, 높이 60px로 통일 */}
+      {/* 🔥 공통 하단 네비게이션 - 최하단 위치, 높이 70px */}
       <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[393px] z-50">
         <BottomNavBar
           activeTab={navActiveTab}

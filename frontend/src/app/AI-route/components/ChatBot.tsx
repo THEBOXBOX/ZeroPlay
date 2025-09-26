@@ -1,4 +1,3 @@
-// frontend/src/app/AI-route/components/ChatBot.tsx (하단 여백 수정 버전)
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -26,7 +25,7 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
     {
       id: '1',
       type: 'bot',
-      content: '안녕하세요! 🎒\nAI 여행 추천 서비스입니다.\n어떤 여행을 계획하고 계신가요?',
+      content: '안녕하세요! \nAI 여행 추천 서비스입니다.\n어떤 여행을 계획하고 계신가요?',
       timestamp: new Date()
     }
   ]);
@@ -200,8 +199,8 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
   return (
     <div className="h-full bg-white flex flex-col">
       
-      {/* 🔥 메시지 영역 - 하단 여백 추가 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ paddingBottom: '100px' }}>
+      {/* 🔥 메시지 영역 - 하단 여백 크게 증가 */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ paddingBottom: '140px' }}>
         {messages.map((message) => (
           <div
             key={message.id}
@@ -261,8 +260,8 @@ export default function ChatBot({ onRouteGenerated, filters }: ChatBotProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 🔥 입력 영역 - 고정 위치로 변경하고 적절한 여백 추가 */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white px-4 py-3 border-t">
+      {/* 🔥 입력 영역 - 더 아래로 고정 */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white px-4 py-4 border-t">
         <div className="bg-gray-100 rounded-2xl p-2 flex items-center gap-3">
           <input
             ref={inputRef}

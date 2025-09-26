@@ -11,7 +11,7 @@ import { LocalDeal, DUMMY_LOCAL_DEALS, hasLocalDeal, getLocalDealForSpot } from 
 import { getCategoryIcon, getCategoryName } from '../utils/CategoryHelper';
 import { calculateDistance, formatDistance, sortSpots } from '../utils/SortingUtils';
 import { getUserId } from '../../utils/UserIdUtils';
-import { useBookmarkManager } from '../../hooks/useBookmarkManager';
+import { useBookmarkManager } from '../../hooks/UseBookmarkManager';
 import { useDisplayData } from '../../hooks/useDisplayData';
 import ListHeader from './ListHeader';
 

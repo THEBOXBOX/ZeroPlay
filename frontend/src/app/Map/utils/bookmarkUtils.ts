@@ -1,4 +1,4 @@
-// src/app/Map/utils/bookmarkUtils.ts
+// frontend/src/app/Map/utils/bookmarkUtils.ts (수정된 완전 버전)
 // 실제 API 연동 버전 - localStorage 대신 DB 사용
 
 export interface BookmarkData {
@@ -11,6 +11,22 @@ export interface BookmarkData {
   local_spots?: any;
   local_deals?: any;
 }
+
+// ============================================================================
+// 마이페이지 동기화를 위한 이벤트 발생 함수
+// ============================================================================
+
+const notifyBookmarkChange = (action: 'add' | 'remove' | 'update', itemId: string, itemType: 'spot' | 'deal') => {
+  window.dispatchEvent(new CustomEvent('mapBookmarkChanged', {
+    detail: { 
+      action, 
+      itemId, 
+      itemType,
+      timestamp: Date.now() 
+    }
+  }));
+  console.log(`🔔 북마크 변경 이벤트 발생: ${action} ${itemType} ${itemId}`);
+};
 
 // 북마크 추가 - API 연동
 export const addBookmark = async (
@@ -39,6 +55,10 @@ export const addBookmark = async (
 
     if (response.ok && data.success) {
       console.log('✅ 북마크 추가 성공 (API):', data);
+      
+      // 🔥 추가: 마이페이지에 변경사항 알림
+      notifyBookmarkChange('add', itemId, type);
+      
       return { success: true };
     } else {
       console.error('❌ 북마크 추가 실패 (API):', data);
@@ -75,6 +95,10 @@ export const removeBookmark = async (
 
     if (response.ok && data.success) {
       console.log('✅ 북마크 삭제 성공 (API):', data);
+      
+      // 🔥 추가: 마이페이지에 변경사항 알림
+      notifyBookmarkChange('remove', itemId, type);
+      
       return { success: true };
     } else {
       console.error('❌ 북마크 삭제 실패 (API):', data);
@@ -149,7 +173,7 @@ export const isBookmarked = async (
   }
 };
 
-// 북마크 토글 - API 연동
+// 북마크 토글 - API 연동 (개선된 버전)
 export const toggleBookmark = async (
   userId: string, 
   itemId: string, 
@@ -255,11 +279,180 @@ export const getMultipleBookmarkStatus = async (
   }
 };
 
+// ============================================================================
+// 디버깅 및 관리 유틸리티 함수들
+// ============================================================================
+
 // 디버깅용 함수들
-export const debugBookmarks = (): void => {
-  console.log('🐛 API 버전 사용 중 - localStorage 디버깅 불가');
+export const debugBookmarks = async (): Promise<void> => {
+  console.log('🐛 북마크 디버그 (API 버전)');
+  
+  const userId = typeof window !== 'undefined' 
+    ? localStorage.getItem('temp_user_id') || '00000000-0000-4000-8000-000000000000'
+    : '00000000-0000-4000-8000-000000000000';
+    
+  try {
+    const result = await getUserBookmarks(userId);
+    
+    if (result.success && result.bookmarks) {
+      console.log('📊 현재 저장된 북마크:');
+      console.table(result.bookmarks.map(bookmark => ({
+        id: bookmark.id.slice(0, 8) + '...',
+        type: bookmark.bookmark_type,
+        spot_id: bookmark.spot_id?.slice(0, 8) + '...' || 'N/A',
+        deal_id: bookmark.deal_id?.slice(0, 8) + '...' || 'N/A',
+        created: new Date(bookmark.created_at).toLocaleString()
+      })));
+      
+      console.log(`📈 총 북마크 수: ${result.bookmarks.length}개`);
+      console.log(`📍 스팟 북마크: ${result.bookmarks.filter(b => b.bookmark_type === 'spot').length}개`);
+      console.log(`🎟️ 딜 북마크: ${result.bookmarks.filter(b => b.bookmark_type === 'deal').length}개`);
+    } else {
+      console.log('❌ 북마크 조회 실패:', result.error);
+    }
+  } catch (error) {
+    console.error('💥 디버그 중 오류:', error);
+  }
 };
 
-export const clearAllBookmarks = (): void => {
-  console.log('🧹 API 버전에서는 개별 삭제만 가능');
+// 북마크 개수 조회
+export const getBookmarkCount = async (type?: 'spot' | 'deal'): Promise<number> => {
+  const userId = typeof window !== 'undefined' 
+    ? localStorage.getItem('temp_user_id') || '00000000-0000-4000-8000-000000000000'
+    : '00000000-0000-4000-8000-000000000000';
+
+  try {
+    const result = await getUserBookmarks(userId);
+    
+    if (!result.success || !result.bookmarks) {
+      return 0;
+    }
+
+    if (type) {
+      return result.bookmarks.filter(bookmark => bookmark.bookmark_type === type).length;
+    }
+    
+    return result.bookmarks.length;
+  } catch (error) {
+    console.error('북마크 개수 조회 실패:', error);
+    return 0;
+  }
+};
+
+// 전체 북마크 삭제 (관리자용)
+export const clearAllBookmarks = async (): Promise<{ success: boolean; error?: string }> => {
+  const userId = typeof window !== 'undefined' 
+    ? localStorage.getItem('temp_user_id') || '00000000-0000-4000-8000-000000000000'
+    : '00000000-0000-4000-8000-000000000000';
+
+  try {
+    const result = await getUserBookmarks(userId);
+    
+    if (!result.success || !result.bookmarks) {
+      return { success: true }; // 이미 비어있음
+    }
+
+    // 모든 북마크를 순차적으로 삭제
+    for (const bookmark of result.bookmarks) {
+      const itemId = bookmark.spot_id || bookmark.deal_id;
+      if (itemId) {
+        await removeBookmark(userId, itemId, bookmark.bookmark_type);
+        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms 대기
+      }
+    }
+
+    console.log('🧹 모든 북마크가 삭제되었습니다.');
+    
+    // 전체 삭제 알림
+    notifyBookmarkChange('remove', 'all', 'spot');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('전체 북마크 삭제 실패:', error);
+    return { success: false, error: '전체 삭제 중 오류가 발생했습니다.' };
+  }
+};
+
+// ============================================================================
+// 추가 유틸리티 함수들
+// ============================================================================
+
+// 북마크 상태가 변경될 때 실행될 콜백 등록
+export const onBookmarkChange = (callback: (detail: any) => void): (() => void) => {
+  const handler = (event: CustomEvent) => {
+    callback(event.detail);
+  };
+
+  window.addEventListener('mapBookmarkChanged', handler as EventListener);
+  
+  // cleanup 함수 반환
+  return () => {
+    window.removeEventListener('mapBookmarkChanged', handler as EventListener);
+  };
+};
+
+// 최근 북마크한 항목 조회 (최대 N개)
+export const getRecentBookmarks = async (limit: number = 10): Promise<BookmarkData[]> => {
+  const userId = typeof window !== 'undefined' 
+    ? localStorage.getItem('temp_user_id') || '00000000-0000-4000-8000-000000000000'
+    : '00000000-0000-4000-8000-000000000000';
+
+  try {
+    const result = await getUserBookmarks(userId);
+    
+    if (!result.success || !result.bookmarks) {
+      return [];
+    }
+
+    // 생성일 기준으로 정렬하여 최근 N개 반환
+    return result.bookmarks
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, limit);
+  } catch (error) {
+    console.error('최근 북마크 조회 실패:', error);
+    return [];
+  }
+};
+
+// 북마크 통계 조회
+export const getBookmarkStats = async () => {
+  const userId = typeof window !== 'undefined' 
+    ? localStorage.getItem('temp_user_id') || '00000000-0000-4000-8000-000000000000'
+    : '00000000-0000-4000-8000-000000000000';
+
+  try {
+    const result = await getUserBookmarks(userId);
+    
+    if (!result.success || !result.bookmarks) {
+      return {
+        total: 0,
+        spots: 0,
+        deals: 0,
+        thisWeek: 0,
+        thisMonth: 0
+      };
+    }
+
+    const bookmarks = result.bookmarks;
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    return {
+      total: bookmarks.length,
+      spots: bookmarks.filter(b => b.bookmark_type === 'spot').length,
+      deals: bookmarks.filter(b => b.bookmark_type === 'deal').length,
+      thisWeek: bookmarks.filter(b => new Date(b.created_at) > weekAgo).length,
+      thisMonth: bookmarks.filter(b => new Date(b.created_at) > monthAgo).length
+    };
+  } catch (error) {
+    console.error('북마크 통계 조회 실패:', error);
+    return {
+      total: 0,
+      spots: 0,
+      deals: 0,
+      thisWeek: 0,
+      thisMonth: 0
+    };
+  }
 };
