@@ -338,11 +338,14 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="cta-section py-20 bg-blue-900 text-white">
         <div className="container max-w-4xl mx-auto px-6 text-center">
           <div className="fade-in">
-            <h2 className="cta-title text-4xl md:text-5xl font-bold mb-6">
-              나를 아는 여행 앱<br />로컬 체험 지도
+            <h2 className="cta-title text-xl md:text-xl font-bold">
+            청년 맞춤형 여행 플랫폼
+            </h2>
+            <h2 className="cta-title text-4xl md:text-7xl font-bold mb-6">
+            ZeroPlay
             </h2>
             <p className="cta-subtitle text-xl mb-12">지금 바로 다운로드하고 여행을 떠나세요!</p>
             
@@ -350,7 +353,7 @@ export default function LandingPage() {
               <Link href="#" className="app-badge bg-white/20 backdrop-blur-sm border border-white/30 px-8 py-4 rounded-full text-lg font-semibold hover:bg-white/30 transition-colors">
                 📱 앱 다운로드
               </Link>
-              <Link href="#" className="app-badge bg-white text-blue-600 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-colors">
+              <Link href="#" className="app-badge bg-white text-blue-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-colors">
                 🌐 웹에서 체험하기
               </Link>
             </div>
@@ -366,8 +369,8 @@ export default function LandingPage() {
       <footer className="footer bg-gray-900 text-white py-16">
         <div className="footer-content max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="footer-section">
-            <h3 className="text-xl font-bold mb-4">🗺️ 로컬 체험 지도</h3>
-            <p className="text-gray-400 mb-4">청년들을 위한 특별한 로컬 여행 서비스</p>
+            <h3 className="text-xl font-bold mb-4">ZeroPlay</h3>
+            <p className="text-gray-400 mb-4">청년들을 위한 <br />특별한 로컬 여행 서비스</p>
             <p className="text-gray-500 text-sm">Next.js + Supabase로 구현</p>
           </div>
 
@@ -403,7 +406,7 @@ export default function LandingPage() {
         </div>
 
         <div className="footer-bottom border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 로컬 체험 지도 프로젝트. All rights reserved.</p>
+          <p>&copy; 2025 ZeroPlay. All rights reserved.</p>
           <p className="mt-2 text-sm">
             본 서비스는 일부 상품에 대해 통신판매중개자로서 통신판매의 당사자가 아니므로, 상품의 예약, 이용 및 환불 등에 대한 의무와 책임은 각 판매자에게 있습니다.
           </p>
