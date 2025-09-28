@@ -127,9 +127,9 @@ export default function LandingPage() {
             </div>
           </Link>
           <nav className="header-nav hidden md:flex items-center space-x-8">
-            <Link href="#features" className="text-gray-700 hover:text-blue-400 transition-colors">기능</Link>
-            <Link href="#demo" className="text-gray-700 hover:text-blue-400 transition-colors">미리보기</Link>
-            <Link href="#benefits" className="text-gray-700 hover:text-blue-400 transition-colors">혜택</Link>
+            <Link href="#features" className="text-gray-700 hover:text-blue-400 transition-colors">미리보기</Link>
+            <Link href="#demo" className="text-gray-700 hover:text-blue-400 transition-colors">기능</Link>
+            <Link href="#benefits" className="text-gray-700 hover:text-blue-400 transition-colors">다운로드</Link>
             <Link href="/" className="download-btn bg-blue-900 text-white px-6 py-2 rounded-full hover:bg-blue-900">바로가기</Link>
           </nav>
         </div>
@@ -139,7 +139,7 @@ export default function LandingPage() {
       <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden bg-blue-50">
         <div className="hero-bg absolute inset-0"></div>
         <div className="hero-content relative z-10 text-center max-w-4xl mx-auto px-6">
-          <div className="hero-badge inline-block bg-white/80 backdrop-blur-sm border border-gray-300 rounded-full px-6 py-2 text-sm text-gray-700 mb-6">
+          <div className="hero-badge inline-block bg-white/80 backdrop-blur-sm border border-blue-900 rounded-full px-6 py-2 text-sm text-gray-700 mb-6">
             부담을 덜고, 온전한 나를 채우다
           </div>
           <h1 className="hero-title text-1xl md:text-3xl font-bold mb-3 bg-gradient-to-r from-blue-900 to-blue-300 bg-clip-text text-transparent">
@@ -162,7 +162,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Preview Section */}
       <section id="features" className="section py-20 bg-white">
         <div className="container max-w-6xl mx-auto px-6">
           <div className="section-header fade-in text-center mb-16">
@@ -196,7 +196,7 @@ export default function LandingPage() {
                 description: "체험, 문화공간, 맛집을 카테고리별로 한눈에 보고 북마크할 수 있습니다. 현재 위치 기준 가까운 스팟도 쉽게 찾을 수 있어요."
               },
               {
-                icon: "💰",
+                icon: "💸",
                 title: "실시간 로컬딜 정보",
                 description: "비는 시간, 당일 소진해야 하는 음식 등 잉여 자원을 활용해 할인 혜택을 제공합니다. 여행자는 합리적인 가격으로 즐기고, 사장님은 손실을 줄여 모두가 만족하는 여행이 됩니다."
               },
@@ -221,123 +221,118 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Demo Section */}
-      <section id="demo" className="demo-section py-20 bg-gray-50">
+      {/* Features_AI Section */}
+      <section id="demo" className="demo-section py-20 bg-blue-50">
         <div className="container max-w-6xl mx-auto px-6">
           <div className="demo-container flex flex-col lg:flex-row items-center gap-16">
-            <div className="demo-content fade-in flex-1">
-              <div className="section-badge inline-block bg-purple-100 text-purple-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
+            
+            {/* 좌측 이미지 영역 */}
+            <div className="demo-image fade-in flex-1 mr-10">
+              <div className="AI"><Image src="/AI.png" alt="로고" width={500
+              } height={50} style={{ width: 'auto', height: 'auto' }}/>
+              </div>
+            </div>
+
+            {/* 우측 텍스트 영역 */}
+            <div className="demo-content fade-in flex-1 px-4 mb-13">
+              <div className="section-badge inline-block bg-white/80 text-blue-900 border border-blue-900 px-6 py-2 rounded-full text-sm font-medium mb-6">
                 어떤 취향이든, 다 맞춰주니까
               </div>
-              <h2 className="demo-title text-4xl font-bold mb-6">
+              <h2 className="demo-title text-4xl font-bold mb-6 leading-snug">
                 어떤 여행 취향이든<br />간단히 알려주세요
               </h2>
               <p className="demo-description text-lg text-gray-600 mb-8">
-                AI는 여러분의 취향에 꼭 맞는 일정을 추천해 드립니다. 
-                여행 전이든 여행 중이든 내가 계획한 일정을 간편하게 수정하고 꺼내보세요.
+                AI는 여러분의 취향에 꼭 맞는 일정을 추천해 드립니다.<br /> 
+                여행 전이든 여행 중이든 계획한 일정을 간편하게 수정하고 꺼내보세요.
               </p>
               <ul className="feature-list space-y-3">
                 {["자연과 함께 여유롭게 힐링", "체험·액티비티 중심", "유명 관광지 필수 코스", "맛집 탐방 위주"].map((item, index) => (
                   <li key={index} className="flex items-center text-gray-700">
-                    <span className="w-2 h-2 bg-blue-600 rounded-full mr-3"></span>
+                    <span className="w-2 h-2 bg-blue-900 rounded-full mr-3"></span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+          </div>
+        </div>
+      </section>
+
+      {/* Features_Benefits Section */}
+      <section id="demo" className="demo-section py-20 bg-white">
+        <div className="container max-w-6xl mx-auto px-6">
+          <div className="demo-container flex flex-col lg:flex-row items-center gap-16">
+            
+            {/* 좌측 텍스트 영역 */}
+            <div className="demo-content fade-in flex-1 px-4 mb-10">
+              <div className="section-badge inline-block bg-blue-50 text-blue-400 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                혜택까지 챙기는 똑똑한 여행
+              </div>
+              <h2 className="demo-title text-4xl font-bold mb-6 leading-snug">
+                여행에 필요한 혜택 정보,<br /> 한눈에 확인하세요
+              </h2>
+              <p className="demo-description text-lg text-gray-600 mb-8">
+                교통비부터 숙박, 문화 할인까지 <br />
+                청년들에게 실질적으로 도움이 되는 혜택을 한눈에 보여드립니다.<br /> 
+                여행을 더 가볍게, 더 풍성하게 만들어보세요.
+              </p>
+              <ul className="feature-list space-y-3">
+                {["KTX·버스 등 교통 할인", "숙박 지원·지역화폐", "문화패스·체험 할인", "지역 소상공인 특가"].map((item, index) => (
+                  <li key={index} className="flex items-center text-gray-700">
+                    <span className="w-2 h-2 bg-blue-900 rounded-full mr-3"></span>
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
 
+            {/* 우측 이미지 영역 */}
+            <div className="demo-image fade-in flex-1">
+              <div className="AI"><Image src="/Benefits.png" alt="로고" width={500
+              } height={50} style={{ width: 'auto', height: 'auto' }}/>
+              </div>
+            </div>
+            
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="stats-section py-20 bg-white">
+      {/* Features_Map Section */}
+      <section id="demo" className="demo-section py-20 bg-blue-50">
         <div className="container max-w-6xl mx-auto px-6">
-          <div className="section-header fade-in text-center mb-16">
-            <div className="section-badge inline-block bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              여행지 정보
-            </div>
-            <h2 className="section-title text-4xl font-bold mb-6">
-              내가 가려는 그곳,<br />지금 상황 어떤가요?
-            </h2>
-            <p className="section-subtitle text-lg text-gray-600 max-w-3xl mx-auto">
-              여행 중에도 내가 여행하는 곳의 유용한 정보와 현지<br />
-              상황을 다른 여행자들과 공유해 보세요.
-            </p>
-          </div>
-
-          <div className="stats-grid grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { number: 500, label: "등록된 로컬 스팟" },
-              { number: 50, label: "실시간 할인 정보" },
-              { number: 1000, label: "AI 추천 코스" },
-              { number: 98, label: "사용자 만족도 (%)" }
-            ].map((stat, index) => (
-              <div key={index} className="stat-item fade-in text-center">
-                <span className="stat-number text-4xl lg:text-5xl font-bold text-blue-600 block mb-2" data-target={stat.number}>
-                  0
-                </span>
-                <div className="stat-label text-gray-600">{stat.label}</div>
+          <div className="demo-container flex flex-col lg:flex-row items-center gap-16">
+            
+            {/* 좌측 이미지 영역 */}
+            <div className="demo-image fade-in flex-1 mr-10">
+              <div className="AI"><Image src="/Map.png" alt="로고" width={500
+              } height={50} style={{ width: 'auto', height: 'auto' }}/>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section id="benefits" className="section py-20 bg-blue-50">
-        <div className="container max-w-6xl mx-auto px-6">
-          <div className="section-header fade-in text-center mb-16">
-            <div className="section-badge inline-block bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-4">
-              여행 혜택
             </div>
-            <h2 className="section-title text-4xl font-bold mb-6">
-              더 저렴하게<br />여행 갈 수 있을까요?
-            </h2>
-            <p className="section-subtitle text-lg text-gray-600">
-              로컬 체험 지도로 여행하면 이런 혜택이 있어요
-            </p>
-          </div>
 
-          <div className="features-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: "🎁",
-                title: "신규 가입 선물",
-                description: "숙소, 투어·티켓 30만 쿠폰팩을 드려요. 지금 바로 가입하고 혜택을 받아보세요."
-              },
-              {
-                icon: "💎",
-                title: "로컬 캐시 적립",
-                description: "예약, 프로모션 참여 시 현금처럼 쓸 수 있는 로컬 캐시를 지급해드립니다."
-              },
-              {
-                icon: "🏆",
-                title: "여행자 클럽 등급별 혜택",
-                description: "여행에 활용 가능한 다양한 혜택을 제공합니다. 등급이 올라갈수록 더 많은 혜택을 받으세요."
-              },
-              {
-                icon: "🎫",
-                title: "매달 도착하는 할인 쿠폰",
-                description: "여행자 클럽 전용으로 매달 숙소, 투어·티켓 할인 쿠폰이 자동으로 지급됩니다."
-              },
-              {
-                icon: "📶",
-                title: "전 세계 데이터 무료",
-                description: "예약 완료 시 전 세계 데이터 5일 무료를 증정합니다. 해외여행에서 걱정 없이 사용하세요."
-              },
-              {
-                icon: "🛡️",
-                title: "여행자 보험 할인",
-                description: "로컬 체험 지도 여행자를 위한 여행자 보험을 최대 10% 할인 혜택으로 제공합니다."
-              }
-            ].map((benefit, index) => (
-              <div key={index} className="feature-card fade-in bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-                <div className="feature-icon text-4xl mb-4">{benefit.icon}</div>
-                <h3 className="feature-title text-xl font-bold mb-4">{benefit.title}</h3>
-                <p className="feature-description text-gray-600 leading-relaxed">{benefit.description}</p>
+            {/* 우측 텍스트 영역 */}
+            <div className="demo-content fade-in flex-1 px-4 py-10 mb-10">
+              <div className="section-badge inline-block bg-white/80 text-blue-900 border border-blue-900 px-6 py-2 rounded-full text-sm font-medium mb-6">
+                여행의 길 위에서 만나는 혜택
               </div>
-            ))}
+              <h2 className="demo-title text-4xl font-bold mb-6 leading-snug">
+                스팟도 찾고, 혜택도 챙기세요
+              </h2>
+              <p className="demo-description text-lg text-gray-600 mb-8">
+                맛집, 문화 공간, 체험 프로그램은 물론, 오늘만 가능한 로컬딜까지.<br /> 
+                여행자는 저렴하게, 사장님은 손실 없이 — <br />
+                모두가 만족하는 여행을 경험하세요.
+              </p>
+              <ul className="feature-list space-y-3">
+                {["공방·원데이 클래스 체험", "독립서점·전시 공간 문화·예술", "로컬 맛집·카페", "실시간 로컬딜 특가"].map((item, index) => (
+                  <li key={index} className="flex items-center text-gray-700">
+                    <span className="w-2 h-2 bg-blue-900 rounded-full mr-3"></span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
           </div>
         </div>
       </section>
