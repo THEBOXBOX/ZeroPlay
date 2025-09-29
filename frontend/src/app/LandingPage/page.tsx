@@ -353,7 +353,7 @@ export default function LandingPage() {
               <Link href="#" className="app-badge bg-white/20 backdrop-blur-sm border border-white/30 px-8 py-4 rounded-full text-lg font-semibold hover:bg-white/30 transition-colors">
                 📱 앱 다운로드
               </Link>
-              <Link href="#" className="app-badge bg-white text-blue-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-colors">
+              <Link href="/" className="app-badge bg-white text-blue-900 px-8 py-4 rounded-full text-lg font-semibold hover:bg-gray-100 transition-colors">
                 🌐 웹에서 체험하기
               </Link>
             </div>
